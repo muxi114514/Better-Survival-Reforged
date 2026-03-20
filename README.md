@@ -55,12 +55,6 @@ Five new weapon categories, each with a full material tier progression (Wood →
 | [Ice and Fire CE](https://github.com/iafenvoy/IceAndFire-CE) | ❌ Optional | Dragon material weapons & silver weapons |
 | [JMixin](https://github.com/nicohman/JMixin) | ❌ Optional | Extended mod compatibility |
 
-## 🛠️ Building
-
-```bash
-./gradlew build
-```
-
 The compiled JAR will be in `build/libs/`.
 
 ## 📄 License
@@ -70,4 +64,3 @@ This project is licensed under the [MIT License](LICENSE).
 ## 🙏 Credits
 
 - **BlockVader** ([@mujmajnkraft](https://github.com/mujmajnkraft)) — Original Better Survival mod author
-- **MX** — Reforged version maintainer, 1.20.1 port, cross-mod integrations, and new features
