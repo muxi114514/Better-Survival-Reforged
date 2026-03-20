@@ -1,0 +1,21 @@
+﻿{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        { "type": "forge:mod_loaded", "modid": "iceandfire" }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "category": "equipment",
+        "ingredients": [
+          { "item": "bettersurvival:itemdragonbonenunchaku" },
+          { "item": "iceandfire:lightning_dragon_blood" }
+        ],
+        "result": {
+          "item": "bettersurvival:itemlightningdragonbonenunchaku"
+        }
+      }
+    }
+  ]
+}

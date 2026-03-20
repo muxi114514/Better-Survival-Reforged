@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "com.chen1335.ultimateEnchantment.mixins.enchDesc",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ultimate_enchantment.mixins.refmap.json",
+  "mixins": [
+    "EnchDescCommonMixin"
+  ],
+  "minVersion": "0.8"
+}

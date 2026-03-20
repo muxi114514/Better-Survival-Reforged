@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "defiledlands:umbrium_ingot"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "item": "bettersurvival:itemumbriumnunchaku",
+    "count": 1
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "defiledlands"
+    }
+  ]
+}

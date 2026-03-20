@@ -1,0 +1,10 @@
+{
+    "type": "bettersurvival:chest_loot",
+    "conditions": [
+        {
+            "condition": "forge:loot_table_id",
+            "loot_table_id": "minecraft:chests/end_city_treasure"
+        }
+    ],
+    "loot_table": "bettersurvival:inject/end_city_treasure"
+}

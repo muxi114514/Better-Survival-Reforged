@@ -1,0 +1,21 @@
+﻿{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        { "type": "forge:mod_loaded", "modid": "iceandfire" }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "category": "equipment",
+        "ingredients": [
+          { "item": "bettersurvival:itemdragonbonehammer" },
+          { "item": "iceandfire:ice_dragon_blood" }
+        ],
+        "result": {
+          "item": "bettersurvival:itemicedragonbonehammer"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "type": "bettersurvival:chest_loot",
+    "conditions": [
+        {
+            "condition": "forge:loot_table_id",
+            "loot_table_id": "minecraft:chests/spawn_bonus_chest"
+        }
+    ],
+    "loot_table": "bettersurvival:inject/spawn_bonus"
+}

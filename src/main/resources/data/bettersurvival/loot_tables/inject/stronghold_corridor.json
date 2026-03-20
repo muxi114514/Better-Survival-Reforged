@@ -1,0 +1,46 @@
+{
+    "pools": [
+        {
+            "rolls": {
+                "min": 0,
+                "max": 1
+            },
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "bettersurvival:itemirondagger",
+                    "weight": 3
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "bettersurvival:itemironnunchaku",
+                    "weight": 2
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "bettersurvival:itemironhammer",
+                    "weight": 1
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "bettersurvival:itemironbattleaxe",
+                    "weight": 1
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "bettersurvival:itemironspear",
+                    "weight": 3,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 3,
+                                "max": 6
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

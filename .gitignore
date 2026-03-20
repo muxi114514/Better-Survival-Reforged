@@ -1,0 +1,31 @@
+# Gradle
+build/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+bin/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Run directory
+run/
+
+# Generated resources (optional, some prefer to commit these)
+# src/generated/
+
+# Compiled
+*.class
+
+# Logs
+logs/
+*.log

@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "entries": [
+        "bettersurvival:spawn_bonus_inject",
+        "bettersurvival:village_weaponsmith_inject",
+        "bettersurvival:stronghold_corridor_inject",
+        "bettersurvival:nether_bridge_inject",
+        "bettersurvival:end_city_treasure_inject"
+    ]
+}

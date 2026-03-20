@@ -1,0 +1,26 @@
+﻿{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        { "type": "forge:mod_loaded", "modid": "iceandfire" }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "category": "equipment",
+        "pattern": [
+    "  I",
+    "  S",
+    "  S"
+        ],
+        "key": {
+          "I": { "item": "iceandfire:silver_ingot" },
+          "S": { "item": "minecraft:stick" }
+        },
+        "result": {
+          "item": "bettersurvival:itemsilverspear"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " S ",
+        "I I"
+    ],
+    "key": {
+        "I": {
+            "item": "iceandfire:dragonsteel_lightning_ingot"
+        },
+        "S": {
+            "item": "iceandfire:chain"
+        }
+    },
+    "result": {
+        "item": "bettersurvival:itemlightningdragonsteelnunchaku"
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "iceandfire"
+        }
+    ]
+}

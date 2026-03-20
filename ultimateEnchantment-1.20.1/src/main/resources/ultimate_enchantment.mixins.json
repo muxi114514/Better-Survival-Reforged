@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "com.chen1335.ultimateEnchantment.mixins.minecraft",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ultimate_enchantment.mixins.refmap.json",
+  "mixins": [
+    "AbstractArrowMixin",
+    "AttributeMixin",
+    "BlockMixin",
+    "EnchantmentHelperMixin",
+    "EnchantmentMixin",
+    "EntityMixin",
+    "ForgeHooksMixin",
+    "ItemEntityMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin"
+  ],
+  "minVersion": "0.8",
+  "client": [
+    "GuiMixin"
+  ]
+}
