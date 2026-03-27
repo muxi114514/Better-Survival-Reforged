@@ -29,13 +29,12 @@ public class BetterSurvival {
         public static final String MOD_ID = "bettersurvival";
         public static final Logger LOGGER = LogUtils.getLogger();
 
-        // Optional mod detection flags
         public static boolean isIafLoaded;
         public static boolean isDefiledLoaded;
         public static boolean isJMixinLoaded;
 
         public BetterSurvival() {
-                // Detect optional mods
+
                 isIafLoaded = net.minecraftforge.fml.ModList.get().isLoaded("iceandfire");
                 isDefiledLoaded = net.minecraftforge.fml.ModList.get().isLoaded("defiledlands");
                 isJMixinLoaded = net.minecraftforge.fml.ModList.get().isLoaded("jmixin");
@@ -48,11 +47,9 @@ public class BetterSurvival {
 
                 IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-                // Register configs
                 ModLoadingContext.get().registerConfig(Type.COMMON, ModConfig.COMMON_SPEC);
                 ModLoadingContext.get().registerConfig(Type.CLIENT, ModConfig.CLIENT_SPEC);
 
-                // Register all DeferredRegisters to the mod event bus
                 ModItems.ITEMS.register(modEventBus);
                 ModBlocks.BLOCKS.register(modEventBus);
                 ModEnchantments.ENCHANTMENTS.register(modEventBus);
@@ -63,11 +60,9 @@ public class BetterSurvival {
                 CreativeTabInit.CREATIVE_TABS.register(modEventBus);
                 ModLootModifiers.LOOT_MODIFIERS.register(modEventBus);
 
-                // Register mod lifecycle event listeners
                 modEventBus.addListener(this::commonSetup);
                 modEventBus.addListener(this::clientSetup);
 
-                // Register for game events
                 MinecraftForge.EVENT_BUS.register(this);
 
                 LOGGER.info("BetterSurvival initializing...");
@@ -76,13 +71,11 @@ public class BetterSurvival {
         private void commonSetup(final FMLCommonSetupEvent event) {
                 ModNetwork.register();
 
-                // Register brewing recipes (must be done on main thread)
                 event.enqueueWork(() -> {
-                        // Blindness: Awkward + Ink Sac -> Blindness; + Redstone -> Long
+
                         addBrewing(Potions.AWKWARD, Items.INK_SAC, ModPotions.BLINDNESS.get());
                         addBrewing(ModPotions.BLINDNESS.get(), Items.REDSTONE, ModPotions.LONG_BLINDNESS.get());
 
-                        // Decay: Regen + Fermented Eye -> Decay; variants
                         addBrewing(Potions.REGENERATION, Items.FERMENTED_SPIDER_EYE, ModPotions.DECAY.get());
                         addBrewing(Potions.LONG_REGENERATION, Items.FERMENTED_SPIDER_EYE, ModPotions.LONG_DECAY.get());
                         addBrewing(Potions.STRONG_REGENERATION, Items.FERMENTED_SPIDER_EYE,
@@ -90,22 +83,18 @@ public class BetterSurvival {
                         addBrewing(ModPotions.DECAY.get(), Items.REDSTONE, ModPotions.LONG_DECAY.get());
                         addBrewing(ModPotions.DECAY.get(), Items.GLOWSTONE_DUST, ModPotions.STRONG_DECAY.get());
 
-                        // Warp: Awkward + Chorus Fruit -> Warp; + Glowstone -> Strong
                         addBrewing(Potions.AWKWARD, Items.CHORUS_FRUIT, ModPotions.WARP.get());
                         addBrewing(ModPotions.WARP.get(), Items.GLOWSTONE_DUST, ModPotions.STRONG_WARP.get());
 
-                        // Antiwarp: Warp + Fermented Eye -> Antiwarp; + Redstone -> Long
                         addBrewing(ModPotions.WARP.get(), Items.FERMENTED_SPIDER_EYE, ModPotions.ANTIWARP.get());
                         addBrewing(ModPotions.ANTIWARP.get(), Items.REDSTONE, ModPotions.LONG_ANTIWARP.get());
 
-                        // Milk -> Dispel (+ Fermented Eye), Milk -> Cure (+ Golden Apple)
                         addBrewing(ModPotions.MILK.get(), Items.FERMENTED_SPIDER_EYE, ModPotions.DISPEL.get());
                         addBrewing(ModPotions.MILK.get(), Items.GOLDEN_APPLE, ModPotions.CURE.get());
                 });
 
-                // Register CauldronInteractions for empty cauldron
                 event.enqueueWork(() -> {
-                        // Empty cauldron + potion bottle → PotionCauldronBlock
+
                         net.minecraft.core.cauldron.CauldronInteraction.EMPTY.put(Items.POTION,
                                         (state, level, pos, player, hand, stack) -> {
                                                 net.minecraft.world.item.alchemy.Potion potion = PotionUtils
@@ -138,7 +127,6 @@ public class BetterSurvival {
                                                 return InteractionResult.SUCCESS;
                                         });
 
-                        // Empty cauldron + milk bucket → PotionCauldronBlock (milk)
                         net.minecraft.core.cauldron.CauldronInteraction.EMPTY.put(Items.MILK_BUCKET,
                                         (state, level, pos, player, hand, stack) -> {
                                                 if (level.isClientSide)
@@ -166,10 +154,6 @@ public class BetterSurvival {
                 LOGGER.info("BetterSurvival common setup");
         }
 
-        /**
-         * Helper to register a standard potion brewing recipe via Forge's
-         * BrewingRecipeRegistry.
-         */
         private static void addBrewing(Potion input, net.minecraft.world.level.ItemLike reagent, Potion output) {
                 BrewingRecipeRegistry.addRecipe(
                                 Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), input)),

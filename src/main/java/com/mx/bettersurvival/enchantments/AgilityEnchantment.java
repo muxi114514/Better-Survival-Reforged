@@ -19,9 +19,6 @@ public class AgilityEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.ARMOR_LEGS, new EquipmentSlot[] { EquipmentSlot.LEGS });
     }
 
-    /**
-     * Called during LivingEvent.LivingTickEvent to apply/update speed modifier.
-     */
     public static void applySpeedModifier(LivingEntity entity, int level) {
         if (level > 0) {
             double d = 0.01 * level;
@@ -41,9 +38,6 @@ public class AgilityEnchantment extends Enchantment {
         }
     }
 
-    /**
-     * Called when the enchantment is no longer active to remove the modifier.
-     */
     public static void removeSpeedModifier(LivingEntity entity) {
         AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && speed.getModifier(SPEED_MODIFIER_UUID) != null) {

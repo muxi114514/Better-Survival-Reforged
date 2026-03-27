@@ -11,14 +11,10 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
-/**
- * Warp effect – instant random teleport.
- * Distance = 16 × (amplifier + 1).
- */
 public class WarpEffect extends InstantenousMobEffect {
 
     public WarpEffect() {
-        super(MobEffectCategory.NEUTRAL, 0x962EDF); // purple
+        super(MobEffectCategory.NEUTRAL, 0x962EDF);
     }
 
     @Override

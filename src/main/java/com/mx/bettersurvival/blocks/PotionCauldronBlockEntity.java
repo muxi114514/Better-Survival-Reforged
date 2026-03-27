@@ -15,9 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Stores which potion type is inside a PotionCauldronBlock.
- */
 public class PotionCauldronBlockEntity extends BlockEntity {
 
     private Potion storedPotion = Potions.EMPTY;
@@ -54,18 +51,12 @@ public class PotionCauldronBlockEntity extends BlockEntity {
         return storedPotion.getEffects();
     }
 
-    /**
-     * Create a potion ItemStack from the stored potion.
-     */
     public ItemStack createPotionStack() {
         if (storedPotion == Potions.EMPTY)
             return ItemStack.EMPTY;
         return PotionUtils.setPotion(new ItemStack(Items.POTION), storedPotion);
     }
 
-    /**
-     * Create a tipped arrow ItemStack from the stored potion.
-     */
     public ItemStack createTippedArrow() {
         if (storedPotion == Potions.EMPTY)
             return ItemStack.EMPTY;

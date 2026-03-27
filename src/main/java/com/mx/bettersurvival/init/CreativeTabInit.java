@@ -18,7 +18,7 @@ public class CreativeTabInit {
                     .title(Component.translatable("itemGroup." + BetterSurvival.MOD_ID))
                     .icon(() -> Items.DIAMOND_SWORD.getDefaultInstance())
                     .displayItems((parameters, output) -> {
-                        // All mod items will be added here once they are registered
+
                         ModItems.ITEMS.getEntries().forEach(entry -> output.accept(entry.get()));
                     })
                     .build());

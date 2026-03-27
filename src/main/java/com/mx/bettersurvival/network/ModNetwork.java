@@ -5,10 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-/**
- * Central network channel for BetterSurvival.
- * Must be registered during commonSetup.
- */
 public class ModNetwork {
 
     private static final String PROTOCOL_VERSION = "1";

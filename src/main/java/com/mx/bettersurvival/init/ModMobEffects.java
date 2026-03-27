@@ -17,7 +17,7 @@ public class ModMobEffects {
     public static final RegistryObject<MobEffect> ANTIWARP = MOB_EFFECTS.register("antiwarp", AntiwarpEffect::new);
     public static final RegistryObject<MobEffect> MILK = MOB_EFFECTS.register("milk", MilkEffect::new);
     public static final RegistryObject<MobEffect> CURE = MOB_EFFECTS.register("cure",
-            () -> new CleanseEffect(MobEffectCategory.BENEFICIAL, 0xFFE34D)); // golden
+            () -> new CleanseEffect(MobEffectCategory.BENEFICIAL, 0xFFE34D));
     public static final RegistryObject<MobEffect> DISPEL = MOB_EFFECTS.register("dispel",
-            () -> new CleanseEffect(MobEffectCategory.HARMFUL, 0xB5E8FF)); // light blue
+            () -> new CleanseEffect(MobEffectCategory.HARMFUL, 0xB5E8FF));
 }

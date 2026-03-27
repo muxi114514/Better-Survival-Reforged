@@ -2,9 +2,6 @@ package com.mx.bettersurvival.capability;
 
 import net.minecraft.nbt.CompoundTag;
 
-/**
- * Default implementation of {@link IArrowProperties}.
- */
 public class ArrowPropertiesImpl implements IArrowProperties {
 
     private int recoveryLevel = 0;

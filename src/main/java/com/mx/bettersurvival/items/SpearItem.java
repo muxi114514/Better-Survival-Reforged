@@ -30,10 +30,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Spear weapon – stackable, throwable, extended reach.
- * Cannot be enchanted, not repairable, not damageable (consumable on throw).
- */
 public class SpearItem extends CustomWeaponItem {
 
     private static final UUID REACH_MODIFIER_UUID = UUID.fromString("f14d3a86-ef0c-48a7-a59f-b6650e6132f5");
@@ -44,7 +40,6 @@ public class SpearItem extends CustomWeaponItem {
         super(tier, damageModifier, speedModifier, properties.stacksTo(16));
         this.reach = reachBonus;
 
-        // Build attribute modifiers including reach
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
         builder.put(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
                 new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier",
@@ -64,8 +59,6 @@ public class SpearItem extends CustomWeaponItem {
         return slot == EquipmentSlot.MAINHAND ? this.spearModifiers : super.getDefaultAttributeModifiers(slot);
     }
 
-    // ======================== Right-click throw ========================
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
@@ -74,18 +67,14 @@ public class SpearItem extends CustomWeaponItem {
         if (!level.isClientSide) {
             FlyingSpearEntity spearEntity = new FlyingSpearEntity(level, player);
 
-            // Copy a single spear to set on the entity
             ItemStack singleSpear = itemstack.copy();
             singleSpear.setCount(1);
             spearEntity.setSpear(singleSpear);
 
-            // Set damage based on weapon stats
             spearEntity.setBaseDamage(this.getAttackDamage());
 
-            // Shoot: velocity 2.0F, inaccuracy 1.0F (same as original)
             spearEntity.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.0F, 1.0F);
 
-            // Pickup mode
             if (isCreative) {
                 spearEntity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
             }
@@ -93,12 +82,10 @@ public class SpearItem extends CustomWeaponItem {
             level.addFreshEntity(spearEntity);
         }
 
-        // Play throw sound
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS,
                 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + 0.5F);
 
-        // Consume one spear (unless creative)
         if (!isCreative) {
             itemstack.shrink(1);
         }
@@ -106,39 +93,33 @@ public class SpearItem extends CustomWeaponItem {
         return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
     }
 
-    // ======================== Other overrides ========================
-
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner) {
-        return false; // Spears don't mine blocks
+        return false;
     }
 
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-        return false; // Not repairable (consumable)
+        return false;
     }
 
     @Override
     public boolean isDamageable(ItemStack stack) {
-        return false; // Not damageable (works via stack count)
+        return false;
     }
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return 0; // No durability bar
+        return 0;
     }
 
-    /**
-     * Calculate break chance for thrown spears.
-     * Higher tier tools have lower break chance.
-     */
     public float breakChance() {
         return 32.0f / this.getTier().getUses();
     }
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        return false; // Stackable, so no enchanting
+        return false;
     }
 
     @Override

@@ -28,15 +28,9 @@ import net.minecraft.world.phys.AABB;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * Hammer weapon – right-click on block for ground-slam AOE:
- * - Crushes blocks (stone → cobblestone, etc.)
- * - Damages and stuns nearby entities
- * - Extra knockback on normal hit
- */
 public class HammerItem extends CustomWeaponItem {
 
-    public static final int STUN_DURATION = 50; // ticks
+    public static final int STUN_DURATION = 50;
 
     public HammerItem(Tier tier, float damageModifier, float speedModifier, Properties properties) {
         super(tier, damageModifier, speedModifier, properties);
@@ -48,7 +42,6 @@ public class HammerItem extends CustomWeaponItem {
         if (player == null)
             return InteractionResult.PASS;
 
-        // Only main hand
         if (context.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return InteractionResult.FAIL;
         }
@@ -71,7 +64,6 @@ public class HammerItem extends CustomWeaponItem {
             yd += 9;
         }
 
-        // Damage and stun nearby entities
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
                 new AABB(pos).inflate(xd, yd, zd))) {
             if (entity != player && entity.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 2 * d
@@ -83,14 +75,12 @@ public class HammerItem extends CustomWeaponItem {
                 entity.hurt(player.damageSources().playerAttack(player),
                         (getAttackDamage() / 2.0F + 1.5F) * distFactor);
 
-                // Apply stun effect
                 if (ModMobEffects.STUN.isPresent()) {
                     entity.addEffect(new MobEffectInstance(ModMobEffects.STUN.get(), STUN_DURATION));
                 }
             }
         }
 
-        // Crush blocks in AOE
         if (player.getAbilities().mayBuild) {
             for (int x = -5; x <= 5; x++) {
                 if ((facing == Direction.WEST || facing == Direction.EAST) && x != 0)
@@ -105,12 +95,10 @@ public class HammerItem extends CustomWeaponItem {
                             boolean particles = x * x + y * y + z * z >= 2.0f * (d - 2.0f);
                             BlockPos position = pos.offset(x, y, z);
 
-                            // Destroy glass blocks
                             destroyGlassAt(level, position.relative(facing));
                             destroyGlassAt(level, position.relative(facing.getOpposite()));
                             destroyGlassAt(level, position);
 
-                            // Crush blocks
                             BlockState faceState = level.getBlockState(position.relative(facing));
                             if (faceState.isFaceSturdy(level, position, Direction.UP)) {
                                 BlockPos pos2 = position.relative(facing);
@@ -129,13 +117,11 @@ public class HammerItem extends CustomWeaponItem {
             }
         }
 
-        // Durability cost
         if (!player.isCreative()) {
             context.getItemInHand().hurtAndBreak(10, player,
                     (p) -> p.broadcastBreakEvent(EquipmentSlot.MAINHAND));
         }
 
-        // Sound and cooldown
         level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
                 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
 
@@ -154,7 +140,7 @@ public class HammerItem extends CustomWeaponItem {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        // Extra knockback on normal hit
+
         target.knockback(0.5F,
                 Mth.sin(attacker.getYRot() * 0.017453292F),
                 -Mth.cos(attacker.getYRot() * 0.017453292F));

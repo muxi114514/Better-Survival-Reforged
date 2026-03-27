@@ -22,18 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.RegistryObject;
 
-/**
- * Client-side event handler — mirrors original ModClientHandler from 1.12.
- *
- * 1. Registers "spinning" item property for model switching
- * (FMLClientSetupEvent)
- * 2. Detects left-click hold → sends SpinningPacket to server
- * 3. Triggers attacks from client when attack cooldown is ready
- */
 public class ClientEventHandler {
-
-    // ======================== MOD bus: item property registration
-    // ========================
 
     @Mod.EventBusSubscriber(modid = BetterSurvival.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBusEvents {
@@ -64,9 +53,6 @@ public class ClientEventHandler {
         }
     }
 
-    // ======================== FORGE bus: client tick for spinning + attacks
-    // ========================
-
     @Mod.EventBusSubscriber(modid = BetterSurvival.MOD_ID, value = Dist.CLIENT)
     public static class ForgeBusEvents {
 
@@ -89,13 +75,11 @@ public class ClientEventHandler {
                         && !player.isPassenger()
                         && player.getUseItem().isEmpty()) {
 
-                    // Start spinning if not already — send packet to server
                     if (!combo.isSpinning()) {
                         combo.setSpinning(true);
                         ModNetwork.CHANNEL.sendToServer(new SpinningPacket(true));
                     }
 
-                    // Trigger attack when cooldown allows (mirrors original ModClientHandler)
                     if (player.getAttackStrengthScale(0.5F) >= 1.0F) {
                         Entity target = mc.crosshairPickEntity;
                         if (target != null && target != player && target.isAlive()) {
@@ -104,16 +88,13 @@ public class ClientEventHandler {
                         }
                     }
                 } else if (combo.isSpinning()) {
-                    // Stop spinning — send packet to server
+
                     combo.setSpinning(false);
                     ModNetwork.CHANNEL.sendToServer(new SpinningPacket(false));
                 }
             });
         }
     }
-
-    // ======================== FORGE bus: item tooltip for vanilla swords
-    // ========================
 
     @Mod.EventBusSubscriber(modid = BetterSurvival.MOD_ID, value = Dist.CLIENT)
     public static class ForgeTooltipEvents {

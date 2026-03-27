@@ -43,29 +43,17 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.UUID;
 
-/**
- * Central event handler that activates all BetterSurvival enchantment effects.
- * Auto-registered via @Mod.EventBusSubscriber.
- */
 @Mod.EventBusSubscriber(modid = BetterSurvival.MOD_ID)
 public class CommonEventHandler {
 
-    // Guard flag to prevent recursive Tunneling calls
     private static boolean isMiningTunneling = false;
 
-    // ======================== Armor (tick-based) ========================
-
-    /**
-     * Agility → movement speed modifier (server-side only, modifies attribute)
-     * Vitality → passive healing at full hunger (server-side only)
-     */
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide)
             return;
 
-        // Agility — check legs slot directly for the enchantment
         ItemStack legsArmor = entity.getItemBySlot(EquipmentSlot.LEGS);
         int agilityLevel = legsArmor.getEnchantmentLevel(ModEnchantments.AGILITY.get());
         if (agilityLevel > 0) {
@@ -74,13 +62,11 @@ public class CommonEventHandler {
             AgilityEnchantment.removeSpeedModifier(entity);
         }
 
-        // Vitality — check chest slot directly
         if (entity instanceof Player player) {
             ItemStack chestArmor = player.getItemBySlot(EquipmentSlot.CHEST);
             int vitalityLevel = chestArmor.getEnchantmentLevel(ModEnchantments.VITALITY.get());
             VitalityEnchantment.healPlayer(player, vitalityLevel);
 
-            // NunchakuCombo countdown (matches original: decrement comboTime each tick)
             if (player.getMainHandItem().getItem() instanceof NunchakuItem) {
                 player.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
                     if (combo.getComboTime() > 0 || combo.getComboPower() > 0) {
@@ -90,7 +76,6 @@ public class CommonEventHandler {
             }
         }
 
-        // Stun — zero motion and defuse creepers
         if (entity.hasEffect(ModMobEffects.STUN.get())) {
             double y = entity.getDeltaMovement().y;
             entity.setDeltaMovement(0, y <= 0 ? y : 0, 0);
@@ -99,7 +84,6 @@ public class CommonEventHandler {
             }
         }
 
-        // Blindness — reduce mob follow range
         if (entity instanceof Mob mob) {
             UUID blindUUID = UUID.fromString("a6107045-134f-4c14-a645-75c3ae5c7a27");
             var followRange = mob.getAttribute(Attributes.FOLLOW_RANGE);
@@ -114,36 +98,21 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== HighJump ========================
-
-    /**
-     * Boost Y velocity on jump.
-     * IMPORTANT: runs on BOTH client and server — jump velocity is
-     * client-authoritative,
-     * the client must apply the boost for it to be visible.
-     */
     @SubscribeEvent
     public static void onLivingJump(LivingEvent.LivingJumpEvent event) {
         LivingEntity entity = event.getEntity();
 
-        // Check feet slot directly for HighJump
         ItemStack boots = entity.getItemBySlot(EquipmentSlot.FEET);
         int level = boots.getEnchantmentLevel(ModEnchantments.HIGH_JUMP.get());
         if (level > 0) {
             HighJumpEnchantment.boostJump(entity, level);
         }
 
-        // Stun — prevent jumping
         if (entity.hasEffect(ModMobEffects.STUN.get())) {
             entity.setDeltaMovement(entity.getDeltaMovement().multiply(1, 0, 1));
         }
     }
 
-    // ======================== Education ========================
-
-    /**
-     * Multiply experience drops when killer has Education enchantment.
-     */
     @SubscribeEvent
     public static void onExpDrop(LivingExperienceDropEvent event) {
         Player attacker = event.getAttackingPlayer();
@@ -156,13 +125,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Weapon Specials ========================
-
-    /**
-     * Assassinate → backstab damage multiplier (Dagger)
-     * Bash → stun on full-strength hit (Hammer)
-     * Disarm → force target to drop weapon (BattleAxe)
-     */
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
@@ -174,19 +136,17 @@ public class CommonEventHandler {
         LivingEntity target = event.getEntity();
         ItemStack weapon = attacker.getMainHandItem();
 
-        // ---- Assassinate ----
         if (weapon.getItem() instanceof DaggerItem dagger) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.ASSASSINATE.get());
             if (level > 0) {
                 float backstabMult = dagger.getBackstabMultiplier(attacker, target);
                 if (backstabMult > 1.0F) {
-                    // Base backstab ×2, plus 0.5 per enchantment level
+
                     event.setAmount(event.getAmount() * (backstabMult + level * 0.5F));
                 }
             }
         }
 
-        // ---- Bash ----
         if (weapon.getItem() instanceof HammerItem) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.BASH.get());
             double stunChance = ModConfig.COMMON.stunBaseChance.get()
@@ -199,7 +159,6 @@ public class CommonEventHandler {
             }
         }
 
-        // ---- Disarm ----
         if (weapon.getItem() instanceof BattleAxeItem) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.DISARM.get());
             if (level > 0 && attacker.getAttackStrengthScale(0.5F) > 0.9F) {
@@ -215,14 +174,12 @@ public class CommonEventHandler {
             }
         }
 
-        // ---- Combo (Nunchaku — damage = base × (comboPower + 1.0)) ----
         if (weapon.getItem() instanceof NunchakuItem) {
             attacker.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
                 event.setAmount(event.getAmount() * (combo.getComboPower() + 1.0F));
             });
         }
 
-        // ---- IaF CE Material Modifier ----
         if (BetterSurvival.isIafLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             float bonus = com.mx.bettersurvival.integration.IaFCompat.getMaterialModifier(weapon, target, attacker);
             if (bonus > 0.0F) {
@@ -230,25 +187,17 @@ public class CommonEventHandler {
             }
         }
 
-        // ---- Crying Obsidian — Weakness on hit ----
         if (weapon.getItem() instanceof CustomWeaponItem cw
                 && cw.getTier() == com.mx.bettersurvival.init.ModTiers.CRYING_OBSIDIAN) {
-            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0)); // Weakness I, 3s
+            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
         }
 
-        // ---- Defiled Lands — Bleeding / Vampirism ----
         if (BetterSurvival.isDefiledLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             com.mx.bettersurvival.integration.DefiledCompat.applyOnHitEffect(
                     weapon, target, attacker, event.getAmount());
         }
     }
 
-    // ======================== RapidFire ========================
-
-    /**
-     * Speeds up bow charge by reducing remaining use duration.
-     * Runs on BOTH client and server for smooth animation sync.
-     */
     @SubscribeEvent
     public static void onItemUseTick(LivingEntityUseItemEvent.Tick event) {
         LivingEntity entity = event.getEntity();
@@ -256,7 +205,6 @@ public class CommonEventHandler {
         if (!(item.getItem() instanceof BowItem))
             return;
 
-        // Check the bow item directly for RapidFire enchantment
         int rapidFireLevel = item.getEnchantmentLevel(ModEnchantments.RAPID_FIRE.get());
         if (rapidFireLevel <= 0)
             return;
@@ -268,11 +216,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Multishot ========================
-
-    /**
-     * Shoot extra arrows in a fan pattern when releasing the bow.
-     */
     @SubscribeEvent
     public static void onArrowLoose(ArrowLooseEvent event) {
         Player player = event.getEntity();
@@ -290,7 +233,7 @@ public class CommonEventHandler {
         if (multishotLevel > 0) {
             int extraArrows = multishotLevel * 2;
             for (int i = 0; i < extraArrows; i++) {
-                // Alternate left/right: +10, -10, +20, -20, ...
+
                 float angleOffset = ((i / 2) + 1) * 10.0F * (i % 2 == 0 ? 1 : -1);
 
                 Arrow arrow = new Arrow(level, player);
@@ -299,19 +242,16 @@ public class CommonEventHandler {
                         power * 3.0F, 1.0F);
                 arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 
-                // Carry over Power enchantment
                 int powerLevel = bow.getEnchantmentLevel(Enchantments.POWER_ARROWS);
                 if (powerLevel > 0) {
                     arrow.setBaseDamage(
                             arrow.getBaseDamage() + (double) powerLevel * 0.5D + 0.5D);
                 }
 
-                // Carry over Flame enchantment
                 if (bow.getEnchantmentLevel(Enchantments.FLAMING_ARROWS) > 0) {
                     arrow.setSecondsOnFire(100);
                 }
 
-                // Critical if fully charged
                 arrow.setCritArrow(power >= 1.0F);
 
                 level.addFreshEntity(arrow);
@@ -319,13 +259,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Range + ArrowRecovery stamp ========================
-
-    /**
-     * When an arrow joins the world:
-     * 1. Boost arrow velocity if the shooter's bow has the Range enchantment.
-     * 2. Stamp ArrowRecovery enchantment level into the arrow's Capability.
-     */
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide)
@@ -335,19 +268,16 @@ public class CommonEventHandler {
         if (!(arrow.getOwner() instanceof Player player))
             return;
 
-        // Check both hands for a bow
         ItemStack bow = findBow(player);
         if (bow.isEmpty())
             return;
 
-        // Range — boost velocity
         int rangeLevel = bow.getEnchantmentLevel(ModEnchantments.RANGE.get());
         if (rangeLevel > 0) {
             double multiplier = RangeEnchantment.getVelocityMultiplier();
             arrow.setDeltaMovement(arrow.getDeltaMovement().scale(multiplier));
         }
 
-        // ArrowRecovery — stamp level into arrow Capability
         int recoveryLevel = bow.getEnchantmentLevel(ModEnchantments.ARROW_RECOVERY.get());
         if (recoveryLevel > 0) {
             arrow.getCapability(ModCapabilities.ARROW_PROPERTIES).ifPresent(props -> {
@@ -356,14 +286,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== ArrowRecovery (Capability-based)
-    // ========================
-
-    /**
-     * Arrow recovery using Capability: when an arrow hits an entity,
-     * read the stored recovery level from the arrow's Capability and
-     * recover the arrow directly to the player's inventory.
-     */
     @SubscribeEvent
     public static void onArrowHit(ProjectileImpactEvent event) {
         if (event.getEntity().level().isClientSide)
@@ -375,13 +297,12 @@ public class CommonEventHandler {
         if (event.getRayTraceResult().getType() != HitResult.Type.ENTITY)
             return;
 
-        // Read recovery level from the arrow's own Capability
         arrow.getCapability(ModCapabilities.ARROW_PROPERTIES).ifPresent(props -> {
             int level = props.getRecoveryLevel();
             if (level > 0) {
                 float chance = Math.min(1.0F, level * 0.33F);
                 if (player.getRandom().nextFloat() < chance) {
-                    // Add arrow directly to player inventory
+
                     player.getInventory().add(new ItemStack(Items.ARROW));
                     arrow.discard();
                 }
@@ -389,12 +310,6 @@ public class CommonEventHandler {
         });
     }
 
-    // ======================== Tunneling + Diamonds ========================
-
-    /**
-     * Tunneling → mine surrounding blocks in a plane.
-     * Diamonds → chance to drop a diamond from stone-type blocks.
-     */
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         Player player = event.getPlayer();
@@ -404,7 +319,6 @@ public class CommonEventHandler {
         BlockState state = event.getState();
         ItemStack tool = player.getMainHandItem();
 
-        // Tunneling — mine extra blocks (guarded against recursion)
         if (!isMiningTunneling) {
             int tunnelingLevel = tool.getEnchantmentLevel(ModEnchantments.TUNNELING.get());
             if (tunnelingLevel > 0) {
@@ -417,7 +331,6 @@ public class CommonEventHandler {
             }
         }
 
-        // Diamonds — chance to drop a diamond when mining stone
         int diamondsLevel = tool.getEnchantmentLevel(ModEnchantments.DIAMONDS.get());
         if (diamondsLevel > 0 && isStoneBlock(state)) {
             float chance = diamondsLevel * 0.01F;
@@ -433,11 +346,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Versatility ========================
-
-    /**
-     * Give a mining speed boost when the tool is not naturally effective.
-     */
     @SubscribeEvent
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
@@ -452,11 +360,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Helpers ========================
-
-    /**
-     * Find a bow in the player's main hand or offhand.
-     */
     private static ItemStack findBow(Player player) {
         ItemStack mainHand = player.getMainHandItem();
         if (mainHand.getItem() instanceof BowItem)
@@ -467,19 +370,11 @@ public class CommonEventHandler {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * Check if a block is "stone" (overworld or nether base stone).
-     */
     private static boolean isStoneBlock(BlockState state) {
         return state.is(BlockTags.BASE_STONE_OVERWORLD)
                 || state.is(BlockTags.BASE_STONE_NETHER);
     }
 
-    // ======================== Spear Death Drop ========================
-
-    /**
-     * Drop all spears stuck in an entity when it dies.
-     */
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
         LivingEntity entity = event.getEntity();
@@ -496,12 +391,6 @@ public class CommonEventHandler {
         });
     }
 
-    // ======================== Spear Melee Break ========================
-
-    /**
-     * When a player hits with a spear, there is a chance it breaks (shrinks by 1).
-     * Matches original LivingAttackEvent logic.
-     */
     @SubscribeEvent
     public static void onLivingAttack(LivingAttackEvent event) {
         Entity source = event.getSource().getEntity();
@@ -512,7 +401,6 @@ public class CommonEventHandler {
 
         ItemStack weapon = player.getMainHandItem();
 
-        // Spear break chance
         if (weapon.getItem() instanceof SpearItem spear) {
             if (!player.getAbilities().instabuild
                     && spear.breakChance() >= player.getRandom().nextFloat()) {
@@ -520,7 +408,6 @@ public class CommonEventHandler {
             }
         }
 
-        // Weapon venom: apply stored potion effects on hit
         if (weapon.hasTag() && weapon.getTag().contains("remainingPotionHits")) {
             int hits = weapon.getTag().getInt("remainingPotionHits");
             if (hits > 0) {
@@ -545,11 +432,6 @@ public class CommonEventHandler {
         }
     }
 
-    // ======================== Antiwarp ========================
-
-    /**
-     * Prevent Enderman teleportation when the entity has the Antiwarp effect.
-     */
     @SubscribeEvent
     public static void onEnderTeleport(net.minecraftforge.event.entity.EntityTeleportEvent.EnderEntity event) {
         if (event.getEntityLiving().hasEffect(ModMobEffects.ANTIWARP.get())) {

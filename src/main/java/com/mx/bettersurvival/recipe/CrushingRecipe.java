@@ -32,7 +32,7 @@ public class CrushingRecipe {
         }
         BlockState result = CrushingRecipe.instance().getCrushingResult(level.getBlockState(pos));
         if (result != null) {
-            // Handle infested blocks – spawn silverfish
+
             BlockState current = level.getBlockState(pos);
             if (isInfestedBlock(current) && !level.isClientSide) {
                 Silverfish silverfish = new Silverfish(net.minecraft.world.entity.EntityType.SILVERFISH, level);
@@ -73,12 +73,11 @@ public class CrushingRecipe {
     }
 
     private CrushingRecipe() {
-        // Stone variants
+
         addCrushingRecipe(Blocks.STONE.defaultBlockState(), Blocks.COBBLESTONE.defaultBlockState());
         addCrushingRecipe(Blocks.COBBLESTONE.defaultBlockState(), Blocks.GRAVEL.defaultBlockState());
         addCrushingRecipe(Blocks.MOSSY_COBBLESTONE.defaultBlockState(), Blocks.GRAVEL.defaultBlockState());
 
-        // Sandstone
         addCrushingRecipe(Blocks.SANDSTONE.defaultBlockState(), Blocks.SAND.defaultBlockState());
         addCrushingRecipe(Blocks.CHISELED_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState());
         addCrushingRecipe(Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState());
@@ -86,7 +85,6 @@ public class CrushingRecipe {
         addCrushingRecipe(Blocks.CHISELED_RED_SANDSTONE.defaultBlockState(), Blocks.RED_SANDSTONE.defaultBlockState());
         addCrushingRecipe(Blocks.CUT_RED_SANDSTONE.defaultBlockState(), Blocks.RED_SANDSTONE.defaultBlockState());
 
-        // Stone bricks
         addCrushingRecipe(Blocks.STONE_BRICKS.defaultBlockState(), Blocks.CRACKED_STONE_BRICKS.defaultBlockState());
         addCrushingRecipe(Blocks.MOSSY_STONE_BRICKS.defaultBlockState(),
                 Blocks.CRACKED_STONE_BRICKS.defaultBlockState());
@@ -94,18 +92,14 @@ public class CrushingRecipe {
                 Blocks.CRACKED_STONE_BRICKS.defaultBlockState());
         addCrushingRecipe(Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), Blocks.COBBLESTONE.defaultBlockState());
 
-        // Polished stone variants → base form
         addCrushingRecipe(Blocks.POLISHED_GRANITE.defaultBlockState(), Blocks.GRANITE.defaultBlockState());
         addCrushingRecipe(Blocks.POLISHED_DIORITE.defaultBlockState(), Blocks.DIORITE.defaultBlockState());
         addCrushingRecipe(Blocks.POLISHED_ANDESITE.defaultBlockState(), Blocks.ANDESITE.defaultBlockState());
 
-        // Prismarine
         addCrushingRecipe(Blocks.PRISMARINE_BRICKS.defaultBlockState(), Blocks.PRISMARINE.defaultBlockState());
 
-        // Grass → Dirt
         addCrushingRecipe(Blocks.GRASS_BLOCK.defaultBlockState(), Blocks.DIRT.defaultBlockState());
 
-        // Infested blocks → their non-infested crushed result
         addCrushingRecipe(Blocks.INFESTED_STONE.defaultBlockState(), Blocks.COBBLESTONE.defaultBlockState());
         addCrushingRecipe(Blocks.INFESTED_COBBLESTONE.defaultBlockState(), Blocks.GRAVEL.defaultBlockState());
         addCrushingRecipe(Blocks.INFESTED_STONE_BRICKS.defaultBlockState(),
@@ -117,7 +111,6 @@ public class CrushingRecipe {
         addCrushingRecipe(Blocks.INFESTED_CHISELED_STONE_BRICKS.defaultBlockState(),
                 Blocks.CRACKED_STONE_BRICKS.defaultBlockState());
 
-        // Deepslate (1.20.1 addition)
         addCrushingRecipe(Blocks.DEEPSLATE.defaultBlockState(), Blocks.COBBLED_DEEPSLATE.defaultBlockState());
         addCrushingRecipe(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), Blocks.GRAVEL.defaultBlockState());
         addCrushingRecipe(Blocks.POLISHED_DEEPSLATE.defaultBlockState(), Blocks.COBBLED_DEEPSLATE.defaultBlockState());
@@ -130,7 +123,6 @@ public class CrushingRecipe {
         addCrushingRecipe(Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState(),
                 Blocks.COBBLED_DEEPSLATE.defaultBlockState());
 
-        // Wool → Carpet (all 16 colors)
         addCrushingRecipe(Blocks.WHITE_WOOL.defaultBlockState(), Blocks.WHITE_CARPET.defaultBlockState());
         addCrushingRecipe(Blocks.ORANGE_WOOL.defaultBlockState(), Blocks.ORANGE_CARPET.defaultBlockState());
         addCrushingRecipe(Blocks.MAGENTA_WOOL.defaultBlockState(), Blocks.MAGENTA_CARPET.defaultBlockState());

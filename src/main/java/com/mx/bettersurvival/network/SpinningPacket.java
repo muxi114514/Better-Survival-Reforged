@@ -7,10 +7,6 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-/**
- * Client → Server packet: sync nunchaku spinning state.
- * Mirrors original MessageNunchakuSpinClient from 1.12.
- */
 public class SpinningPacket {
 
     private final boolean spinning;

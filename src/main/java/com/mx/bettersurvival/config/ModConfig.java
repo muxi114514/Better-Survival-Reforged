@@ -23,11 +23,8 @@ public class ModConfig {
                 CLIENT = clientPair.getLeft();
         }
 
-        // =========================================================================
-        // Common Config (synced server → client)
-        // =========================================================================
         public static class CommonConfig {
-                // --- Weapon ---
+
                 public final ForgeConfigSpec.DoubleValue spearReachBonus;
                 public final ForgeConfigSpec.DoubleValue stunBaseChance;
                 public final ForgeConfigSpec.DoubleValue bashModifier;
@@ -47,7 +44,6 @@ public class ModConfig {
                 public final ForgeConfigSpec.IntValue crossbowReloadTime;
                 public final ForgeConfigSpec.BooleanValue allowVanillaShields;
 
-                // --- Enchantment max levels ---
                 public final ForgeConfigSpec.IntValue assassinateLevel;
                 public final ForgeConfigSpec.IntValue agilityLevel;
                 public final ForgeConfigSpec.IntValue arrowRecoveryLevel;
@@ -74,7 +70,6 @@ public class ModConfig {
                 public final ForgeConfigSpec.IntValue vitalityLevel;
                 public final ForgeConfigSpec.IntValue weightlessLevel;
 
-                // --- Enchantment treasure flags ---
                 public final ForgeConfigSpec.BooleanValue assassinateTreasure;
                 public final ForgeConfigSpec.BooleanValue agilityTreasure;
                 public final ForgeConfigSpec.BooleanValue arrowRecoveryTreasure;
@@ -101,22 +96,19 @@ public class ModConfig {
                 public final ForgeConfigSpec.BooleanValue vitalityTreasure;
                 public final ForgeConfigSpec.BooleanValue weightlessTreasure;
 
-                // --- Enchantment misc ---
                 public final ForgeConfigSpec.DoubleValue rangeVelocity;
                 public final ForgeConfigSpec.BooleanValue preventTunnelingBlockEntities;
 
-                // --- Potion Coating ---
                 public final ForgeConfigSpec.IntValue potionHitsBase;
                 public final ForgeConfigSpec.IntValue potionHitsMax;
                 public final ForgeConfigSpec.DoubleValue potionDurationDivisor;
                 public final ForgeConfigSpec.IntValue potionAmplifierModifier;
                 public final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> potionBlacklist;
 
-                // --- Materials ---
                 public final ForgeConfigSpec.BooleanValue moddedMaterials;
 
                 CommonConfig(ForgeConfigSpec.Builder builder) {
-                        // ---- Weapons ----
+
                         builder.comment("Weapon settings").push("weapons");
 
                         spearReachBonus = builder.comment("Extra attack reach given to spears.")
@@ -165,7 +157,6 @@ public class ModConfig {
 
                         builder.pop();
 
-                        // ---- Enchantments ----
                         builder.comment("Enchantment settings").push("enchantments");
 
                         assassinateLevel = builder.defineInRange("assassinateMaxLevel", 3, 0, 10);
@@ -228,7 +219,6 @@ public class ModConfig {
 
                         builder.pop();
 
-                        // ---- Potion Coating ----
                         builder.comment("Potion Coating settings").push("potion_coating");
 
                         potionHitsBase = builder.comment(
@@ -250,7 +240,6 @@ public class ModConfig {
 
                         builder.pop();
 
-                        // ---- Materials ----
                         builder.comment("Material settings").push("materials");
 
                         moddedMaterials = builder
@@ -261,9 +250,6 @@ public class ModConfig {
                 }
         }
 
-        // =========================================================================
-        // Client Config
-        // =========================================================================
         public static class ClientConfig {
                 public final ForgeConfigSpec.BooleanValue fovShields;
                 public final ForgeConfigSpec.BooleanValue staticFOV;

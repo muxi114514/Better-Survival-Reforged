@@ -11,7 +11,6 @@ public class ModEnchantments {
     public static final DeferredRegister<Enchantment> ENCHANTMENTS = DeferredRegister
             .create(ForgeRegistries.ENCHANTMENTS, BetterSurvival.MOD_ID);
 
-    // --- Melee weapon ---
     public static final RegistryObject<Enchantment> VAMPIRISM = ENCHANTMENTS.register("vampirism",
             VampirismEnchantment::new);
     public static final RegistryObject<Enchantment> EDUCATION = ENCHANTMENTS.register("education",
@@ -25,7 +24,6 @@ public class ModEnchantments {
     public static final RegistryObject<Enchantment> DISARM = ENCHANTMENTS.register("disarm",
             () -> new WeaponSpecialEnchantment(WeaponSpecialEnchantment.WeaponType.BATTLEAXE));
 
-    // --- Bow ---
     public static final RegistryObject<Enchantment> ARROW_RECOVERY = ENCHANTMENTS.register("arrowrecovery",
             ArrowRecoveryEnchantment::new);
     public static final RegistryObject<Enchantment> MULTISHOT = ENCHANTMENTS.register("multishot",
@@ -35,7 +33,6 @@ public class ModEnchantments {
     public static final RegistryObject<Enchantment> RANGE = ENCHANTMENTS.register("range",
             RangeEnchantment::new);
 
-    // --- Digger ---
     public static final RegistryObject<Enchantment> TUNNELING = ENCHANTMENTS.register("tunneling",
             TunnelingEnchantment::new);
     public static final RegistryObject<Enchantment> DIAMONDS = ENCHANTMENTS.register("diamonds",
@@ -43,7 +40,6 @@ public class ModEnchantments {
     public static final RegistryObject<Enchantment> VERSATILITY = ENCHANTMENTS.register("versatility",
             VersatilityEnchantment::new);
 
-    // --- Armor ---
     public static final RegistryObject<Enchantment> AGILITY = ENCHANTMENTS.register("agility",
             AgilityEnchantment::new);
     public static final RegistryObject<Enchantment> HIGH_JUMP = ENCHANTMENTS.register("highjump",
