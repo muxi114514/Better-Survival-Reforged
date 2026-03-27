@@ -15,11 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-/**
- * A Global Loot Modifier that adds items from a sub-loot-table into the
- * original loot pool. Used to inject BetterSurvival weapons into vanilla
- * dungeon chests.
- */
 public class ChestLootModifier extends LootModifier {
 
     public static final Supplier<Codec<ChestLootModifier>> CODEC = Suppliers

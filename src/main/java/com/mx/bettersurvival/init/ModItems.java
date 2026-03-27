@@ -18,9 +18,6 @@ public class ModItems {
         public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,
                         BetterSurvival.MOD_ID);
 
-        // ==================== Tier Definitions ====================
-
-        /** Pairs of (Tier, lowercaseName) for registration loops. */
         private record TierEntry(Tier tier, String name) {
         }
 
@@ -31,14 +28,8 @@ public class ModItems {
                         new TierEntry(Tiers.GOLD, "gold"),
                         new TierEntry(Tiers.DIAMOND, "diamond"),
                         new TierEntry(ModTiers.EMERALD, "emerald"),
-                        new TierEntry(ModTiers.CRYING_OBSIDIAN, "cryingobsidian"));
-
-        // ==================== Default weapon stats (match ModConfig defaults)
-        // ====================
-        // Config values cannot be read at registration time, so we use hardcoded
-        // defaults.
-        // Config-driven attribute overrides can be implemented via events in a future
-        // phase.
+                        new TierEntry(ModTiers.CRYING_OBSIDIAN, "cryingobsidian"),
+                        new TierEntry(ModTiers.NETHERITE, "netherite"));
 
         private static final float HAMMER_DMG = 1.2F, HAMMER_SPD = 1.35F;
         private static final float SPEAR_DMG = 0.75F, SPEAR_SPD = 1.0F, SPEAR_REACH = 2.0F;
@@ -46,18 +37,14 @@ public class ModItems {
         private static final float BATTLEAXE_DMG = 1.6F, BATTLEAXE_SPD = 1.25F;
         private static final float NUNCHAKU_DMG = 0.5F, NUNCHAKU_SPD = 0.3F;
 
-        // ==================== Weapon Registration ====================
-
-        // Store all weapon registry objects for creative tab population
         public static final List<RegistryObject<Item>> ALL_WEAPONS = new ArrayList<>();
 
         static {
-                // Register vanilla tier weapons
+
                 for (TierEntry entry : TIERS) {
                         registerWeaponsForTier(entry.tier(), entry.name());
                 }
 
-                // Register IaF CE tier weapons (if IaF is present)
                 boolean iafPresent = net.minecraftforge.fml.ModList.get().isLoaded("iceandfire");
 
                 if (iafPresent) {
@@ -66,7 +53,6 @@ public class ModItems {
                         }
                 }
 
-                // Register Defiled Lands tier weapons (if Defiled Lands is present)
                 boolean defiledPresent = net.minecraftforge.fml.ModList.get().isLoaded("defiledlands");
 
                 if (defiledPresent) {

@@ -16,10 +16,6 @@ public class EducationEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.WEAPON, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    /**
-     * Called during LivingExperienceDropEvent if enemy is killed by an attacker
-     * with enchanted weapon.
-     */
     public static float getExpMultiplier(Player killer, LivingEntity killed) {
         if (!killed.shouldDropExperience())
             return 1.0F;

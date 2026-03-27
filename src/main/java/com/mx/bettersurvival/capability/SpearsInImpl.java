@@ -5,10 +5,6 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Default implementation of {@link ISpearsIn}.
- * Stores spear ItemStacks in a simple ArrayList.
- */
 public class SpearsInImpl implements ISpearsIn {
 
     private final List<ItemStack> spears = new ArrayList<>();

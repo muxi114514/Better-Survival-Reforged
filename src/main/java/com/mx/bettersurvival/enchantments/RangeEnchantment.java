@@ -11,9 +11,6 @@ public class RangeEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.BOW, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    /**
-     * Returns the velocity multiplier for Range enchanted arrows.
-     */
     public static double getVelocityMultiplier() {
         return ModConfig.COMMON.rangeVelocity.get();
     }

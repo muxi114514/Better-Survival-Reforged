@@ -1,11 +1,5 @@
 package com.mx.bettersurvival.capability;
 
-/**
- * Default implementation of INunchakuCombo.
- * Matches original 1.12 NunchakuCombo exactly:
- * - comboPower capped at 1.0, each hit sets comboTime to 30
- * - countDown decrements comboTime; when 0 both timers reset
- */
 public class NunchakuComboImpl implements INunchakuCombo {
 
     private float comboPower;
@@ -20,7 +14,7 @@ public class NunchakuComboImpl implements INunchakuCombo {
     @Override
     public void setComboPower(float power) {
         this.comboPower = Math.min(power, 1.0F);
-        this.comboTime = 30; // reset countdown on every hit (matches original)
+        this.comboTime = 30;
     }
 
     @Override

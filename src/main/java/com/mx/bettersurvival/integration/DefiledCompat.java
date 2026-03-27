@@ -15,18 +15,11 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Compatibility layer for Defiled Lands (1.20.1).
- * <p>
- * Provides Umbrium (iron-equivalent, applies Bleeding on hit) and
- * Scarlite (diamond-equivalent, heals attacker on hit) weapon tiers.
- */
 public final class DefiledCompat {
 
     private DefiledCompat() {
     }
 
-    // ── Cached references ──────────────────────────────────────────
     private static Tier UMBRIUM;
     private static Tier SCARLITE;
     private static MobEffect BLEEDING_EFFECT;
@@ -34,22 +27,14 @@ public final class DefiledCompat {
     private static boolean initialized = false;
     private static boolean bleedingResolved = false;
 
-    /** Pairs of (Tier, lowercaseName) for weapon registration. */
     public record DefiledTierEntry(Tier tier, String name) {
     }
-
-    // ══════════════════════════════════════════════════════════════════
-    // Initialization
-    // ══════════════════════════════════════════════════════════════════
 
     public static void init() {
         if (initialized)
             return;
         initialized = true;
 
-        // Tiers — hardcoded to match Defiled Lands ModTiers values.
-        // UMBRIUM: level=2, uses=600, speed=6.0, damage=2.0, enchant=14
-        // SCARLITE: level=3, uses=1561, speed=8.0, damage=3.0, enchant=10
         try {
             if (!net.minecraftforge.fml.ModList.get().isLoaded("defiledlands"))
                 return;
@@ -67,13 +52,9 @@ public final class DefiledCompat {
             BetterSurvival.LOGGER.warn("Failed to create Defiled Lands tiers: {}", e.getMessage());
             UMBRIUM = SCARLITE = null;
         }
-        // NOTE: Bleeding effect is resolved lazily on first hit, NOT here.
-        // RegistrySupplier.get() would fail during static init.
+
     }
 
-    /**
-     * Returns Defiled Lands tier entries for weapon registration.
-     */
     public static List<DefiledTierEntry> getDefiledTierEntries() {
         init();
         List<DefiledTierEntry> list = new ArrayList<>();
@@ -84,19 +65,6 @@ public final class DefiledCompat {
         return list;
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // On-hit effects
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Apply Defiled Lands on-hit effects.
-     * Called from CommonEventHandler when the attacker uses a Defiled Lands weapon.
-     *
-     * @param stack    the weapon
-     * @param target   entity being hurt
-     * @param attacker the attacking player (may be null)
-     * @param damage   actual damage dealt
-     */
     public static void applyOnHitEffect(ItemStack stack, LivingEntity target,
             @Nullable Player attacker, float damage) {
         if (!(stack.getItem() instanceof CustomWeaponItem weapon))
@@ -104,12 +72,10 @@ public final class DefiledCompat {
 
         Tier tier = weapon.getTier();
 
-        // Debug: log all tier comparisons
         BetterSurvival.LOGGER.debug(
                 "[DefiledCompat] applyOnHitEffect called. tier={}, UMBRIUM={}, SCARLITE={}, tierMatch_UMB={}, tierMatch_SCAR={}",
                 tier, UMBRIUM, SCARLITE, tier == UMBRIUM, tier == SCARLITE);
 
-        // Umbrium: apply Bleeding I for 80 ticks (4 seconds)
         if (tier == UMBRIUM) {
             resolveBleedingIfNeeded();
             BetterSurvival.LOGGER.info("[DefiledCompat] Umbrium hit! BLEEDING_EFFECT={}", BLEEDING_EFFECT);
@@ -119,7 +85,6 @@ public final class DefiledCompat {
             }
         }
 
-        // Scarlite: heal attacker based on damage dealt (min 1.0 HP = half heart)
         if (tier == SCARLITE && attacker != null) {
             float healAmount = Math.max(damage * 0.2F, 1.0F);
             attacker.heal(healAmount);
@@ -128,13 +93,6 @@ public final class DefiledCompat {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Tooltip
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Add tooltip lines for Defiled Lands weapons.
-     */
     public static void appendTooltip(ItemStack stack, List<Component> tooltip) {
         if (!(stack.getItem() instanceof CustomWeaponItem weapon))
             return;
@@ -150,24 +108,16 @@ public final class DefiledCompat {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Helpers
-    // ══════════════════════════════════════════════════════════════════
-
     public static boolean isDefiledTier(Tier tier) {
         return tier == UMBRIUM || tier == SCARLITE;
     }
 
-    /**
-     * Lazily resolve the Bleeding effect from Defiled Lands registry.
-     * Called on first hit, NOT during init (RegistrySupplier.get() would fail).
-     */
     private static void resolveBleedingIfNeeded() {
         if (bleedingResolved)
             return;
         bleedingResolved = true;
         try {
-            // Use Forge registry lookup directly — no reflection needed
+
             net.minecraft.resources.ResourceLocation bleedingId = new net.minecraft.resources.ResourceLocation(
                     "defiledlands", "bleeding");
             BLEEDING_EFFECT = net.minecraftforge.registries.ForgeRegistries.MOB_EFFECTS.getValue(bleedingId);

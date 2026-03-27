@@ -7,10 +7,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Provider that attaches {@link INunchakuCombo} capability to player entities.
- * No NBT serialization — combo state is transient and resets on reload.
- */
 public class NunchakuComboProvider implements ICapabilityProvider {
 
     private final NunchakuComboImpl instance = new NunchakuComboImpl();

@@ -12,11 +12,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Capability provider for {@link ISpearsIn}.
- * Attached to all LivingEntity instances via {@link CapabilityEventHandler}.
- * Serializes stuck spears as a ListTag of CompoundTags.
- */
 public class SpearsInProvider implements ICapabilitySerializable<CompoundTag> {
 
     private final ISpearsIn instance = new SpearsInImpl();

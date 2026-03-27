@@ -13,9 +13,6 @@ public class VitalityEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.ARMOR_CHEST, new EquipmentSlot[] { EquipmentSlot.CHEST });
     }
 
-    /**
-     * Called during LivingEvent.LivingTickEvent to heal the player passively.
-     */
     public static void healPlayer(Player player, int level) {
         if (level > 0
                 && player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)

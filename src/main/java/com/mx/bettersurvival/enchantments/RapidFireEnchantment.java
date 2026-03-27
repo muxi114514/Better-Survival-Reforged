@@ -14,10 +14,6 @@ public class RapidFireEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.BOW, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    /**
-     * Called during LivingEntityUseItemEvent.Tick to speed up bow charge.
-     * Returns how many extra ticks to add to the charge counter.
-     */
     public static int getChargeTimeReduction(LivingEntity shooter, int charge) {
         int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.RAPID_FIRE.get(), shooter);
         if (level < 4) {

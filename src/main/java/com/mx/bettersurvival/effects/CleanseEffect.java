@@ -13,13 +13,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Cleanse effect – selectively removes effects based on category.
- * <p>
- * When this effect is BENEFICIAL (Cure): removes all HARMFUL effects.
- * When this effect is HARMFUL (Dispel): removes all BENEFICIAL effects.
- * Only removes effects that are curable by milk.
- */
 public class CleanseEffect extends InstantenousMobEffect {
 
     public CleanseEffect(MobEffectCategory category, int color) {
@@ -47,7 +40,7 @@ public class CleanseEffect extends InstantenousMobEffect {
                 continue;
 
             boolean effectIsBad = instance.getEffect().getCategory() == MobEffectCategory.HARMFUL;
-            // Cure (beneficial) removes bad effects; Dispel (harmful) removes good effects
+
             if (thisIsBad && !effectIsBad) {
                 toRemove.add(instance.getEffect());
             } else if (!thisIsBad && effectIsBad) {

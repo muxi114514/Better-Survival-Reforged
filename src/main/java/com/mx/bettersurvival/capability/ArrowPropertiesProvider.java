@@ -8,11 +8,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Provider that attaches {@link IArrowProperties} capability to arrow entities.
- * Implements serialization so the recovery level persists if the arrow is
- * saved/loaded.
- */
 public class ArrowPropertiesProvider implements ICapabilitySerializable<CompoundTag> {
 
     private final ArrowPropertiesImpl instance = new ArrowPropertiesImpl();

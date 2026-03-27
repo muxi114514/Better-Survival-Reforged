@@ -15,12 +15,6 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
-/**
- * Renderer for the flying spear entity.
- * Renders the spear's item model rotated to look like a projectile in flight.
- * Ported from 1.12's RenderFlyingSpear using PoseStack instead of
- * GlStateManager.
- */
 public class FlyingSpearRenderer extends EntityRenderer<FlyingSpearEntity> {
 
     public FlyingSpearRenderer(EntityRendererProvider.Context context) {
@@ -36,10 +30,10 @@ public class FlyingSpearRenderer extends EntityRenderer<FlyingSpearEntity> {
 
         poseStack.pushPose();
         {
-            // Rotate to match entity's yaw and pitch (projectile flight direction)
+
             poseStack.mulPose(Axis.YP.rotationDegrees(entityYaw));
             poseStack.mulPose(Axis.XN.rotationDegrees(entity.getXRot()));
-            // Rotate -90° Y so the item faces the flight direction, then -45° Z for tilt
+
             poseStack.mulPose(Axis.YN.rotationDegrees(90.0F));
             poseStack.mulPose(Axis.ZN.rotationDegrees(45.0F));
 

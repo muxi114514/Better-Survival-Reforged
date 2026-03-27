@@ -13,10 +13,6 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * Battle Axe weapon – supports both weapon and axe enchantments.
- * Disarm mechanic will be handled by CommonEventHandler in a future phase.
- */
 public class BattleAxeItem extends CustomWeaponItem {
 
     public BattleAxeItem(Tier tier, float damageModifier, float speedModifier, Properties properties) {
@@ -32,7 +28,7 @@ public class BattleAxeItem extends CustomWeaponItem {
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        // Battle axes can also accept digger (axe) enchantments
+
         if (enchantment.category == EnchantmentCategory.DIGGER) {
             return true;
         }

@@ -33,14 +33,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-/**
- * Custom potion cauldron – stores a potion type (via BlockEntity) and supports:
- * - Glass bottle extraction → potion bottle
- * - Weapon dipping → weapon gets poisoned (NBT)
- * - Arrow dipping → tipped arrows
- * - Milk bucket extraction
- * Level 1-3 like vanilla water cauldron.
- */
 public class PotionCauldronBlock extends AbstractCauldronBlock implements net.minecraft.world.level.block.EntityBlock {
 
     public static final IntegerProperty LEVEL = LayeredCauldronBlock.LEVEL;
@@ -80,9 +72,6 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
         return new PotionCauldronBlockEntity(pos, state);
     }
 
-    /**
-     * Decrease the cauldron level. If it reaches 0, replace with empty cauldron.
-     */
     public static void decreaseLevel(BlockState state, Level level, BlockPos pos) {
         int newLevel = state.getValue(LEVEL) - 1;
         BlockState newState = newLevel == 0
@@ -92,7 +81,7 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
     }
 
     private void registerInteractions() {
-        // Glass bottle → extract potion
+
         INTERACTIONS.put(Items.GLASS_BOTTLE, (state, level, pos, player, hand, stack) -> {
             if (level.isClientSide)
                 return InteractionResult.SUCCESS;
@@ -120,7 +109,6 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
             return InteractionResult.SUCCESS;
         });
 
-        // Bucket → extract milk
         INTERACTIONS.put(Items.BUCKET, (state, level, pos, player, hand, stack) -> {
             if (level.isClientSide)
                 return InteractionResult.SUCCESS;
@@ -142,7 +130,6 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
             return InteractionResult.SUCCESS;
         });
 
-        // Arrow → tipped arrow
         INTERACTIONS.put(Items.ARROW, (state, level, pos, player, hand, stack) -> {
             if (level.isClientSide)
                 return InteractionResult.SUCCESS;
@@ -169,14 +156,11 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
         });
     }
 
-    /**
-     * Called for any item not in the interaction map. Handles weapon dipping.
-     */
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
             BlockHitResult hit) {
         ItemStack stack = player.getItemInHand(hand);
-        // Check if it's a weapon that can be poisoned
+
         if (stack.getItem() instanceof SwordItem || stack.getItem() instanceof CustomWeaponItem) {
             if (level.isClientSide)
                 return InteractionResult.SUCCESS;
@@ -188,12 +172,12 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
             Potion potion = pbe.getStoredPotion();
             if (potion == Potions.EMPTY || potion == Potions.WATER || potion == Potions.MUNDANE
                     || potion == Potions.THICK || potion == Potions.AWKWARD) {
-                // Plain water — remove any existing poison
+
                 stack.removeTagKey("Potion");
                 stack.removeTagKey("CustomPotionEffects");
                 stack.removeTagKey("remainingPotionHits");
             } else {
-                // Check potion blacklist
+
                 net.minecraft.resources.ResourceLocation potionId = net.minecraftforge.registries.ForgeRegistries.POTIONS
                         .getKey(potion);
                 if (potionId != null && com.mx.bettersurvival.config.ModConfig.COMMON.potionBlacklist.get()
@@ -204,14 +188,13 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
                 int baseHits = com.mx.bettersurvival.config.ModConfig.COMMON.potionHitsBase.get();
                 int maxHits = com.mx.bettersurvival.config.ModConfig.COMMON.potionHitsMax.get();
 
-                // Apply poison to weapon
                 var tag = stack.getOrCreateTag();
                 int existingHits = tag.getInt("remainingPotionHits");
                 if (existingHits > 0 && PotionUtils.getPotion(stack) == potion) {
-                    // Same potion: add doses
+
                     tag.putInt("remainingPotionHits", Math.min(existingHits + baseHits, maxHits));
                 } else {
-                    // New potion or no existing poison
+
                     PotionUtils.setPotion(stack, potion);
                     tag.putInt("remainingPotionHits", baseHits);
                 }

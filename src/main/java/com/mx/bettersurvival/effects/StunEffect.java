@@ -6,10 +6,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-/**
- * Stun effect – prevents movement and attack. Used by the Hammer weapon.
- * Applies a massive movement speed reduction.
- */
 public class StunEffect extends MobEffect {
 
     private static final String STUN_SLOWDOWN_UUID = "7107DE5E-7CE8-4030-940E-514C1F160890";
@@ -24,8 +20,7 @@ public class StunEffect extends MobEffect {
 
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
-        // The stun is implemented through attribute modifiers (speed = 0)
-        // No additional tick logic needed
+
     }
 
     @Override

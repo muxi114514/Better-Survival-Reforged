@@ -16,15 +16,9 @@ public class VersatilityEnchantment extends Enchantment {
         super(Rarity.UNCOMMON, EnchantmentCategory.DIGGER, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    /**
-     * Called during PlayerEvent.BreakSpeed to give a speed boost when the tool is
-     * not effective.
-     * Returns the modified mining speed, or the original speed if no boost is
-     * needed.
-     */
     public static float getSpeedModifier(Player miner, BlockState state) {
         ItemStack stack = miner.getMainHandItem();
-        // If the tool is not effective on the block, give half the tool's base speed
+
         if (miner.getDestroySpeed(state) <= 1.0F && stack.getItem() instanceof DiggerItem digger) {
             return digger.getTier().getSpeed() / 2.0F;
         }

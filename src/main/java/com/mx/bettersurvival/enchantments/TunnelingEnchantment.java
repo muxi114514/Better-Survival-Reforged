@@ -21,9 +21,6 @@ public class TunnelingEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.DIGGER, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    /**
-     * Called during BlockEvent.BreakEvent to mine surrounding blocks.
-     */
     public static void mineManyBlocks(Player miner, BlockState state, BlockPos pos) {
         Level level = miner.level();
         ItemStack stack = miner.getMainHandItem();
@@ -66,7 +63,7 @@ public class TunnelingEnchantment extends Enchantment {
             return false;
         if (ModConfig.COMMON.preventTunnelingBlockEntities.get() && player.level().getBlockEntity(pos) != null)
             return false;
-        // In 1.20.1, check if the tool is correct for the block
+
         ItemStack stack = player.getMainHandItem();
         return stack.isCorrectToolForDrops(state);
     }

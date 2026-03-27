@@ -17,22 +17,11 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Compatibility layer for Ice and Fire CE (1.20.1).
- * <p>
- * All IaF CE class references are done through reflection to keep IaF
- * as an optional dependency. If IaF is not loaded, all methods return
- * safe defaults (0 modifier, empty tier list, etc.).
- * <p>
- * Chain lightning for lightning dragonbone weapons is delegated to JMixin's
- * {@code ChainLightningUtils} (called directly — JMixin is a compile dep).
- */
 public final class IaFCompat {
 
     private IaFCompat() {
     }
 
-    // ── Cached Tier references (resolved via reflection at init) ──────
     private static Tier COPPER;
     private static Tier SILVER;
     private static Tier DRAGONBONE;
@@ -45,26 +34,15 @@ public final class IaFCompat {
 
     private static boolean initialized = false;
 
-    /** Pairs of (Tier, lowercaseName) for weapon registration. */
     public record IafTierEntry(Tier tier, String name) {
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Initialization
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Try to resolve IaF CE tiers from the IafItems class via reflection.
-     * Must be called after IaF has been loaded (i.e. during or after mod
-     * construction, not in a static initializer).
-     */
     public static void init() {
         if (initialized)
             return;
         initialized = true;
         try {
-            // Replicate Ice and Fire tiers using ForgeTier to avoid Class.forName()
-            // deadlocks during parallel mod construction.
+
             COPPER = new net.minecraftforge.common.ForgeTier(2, 300, 0.7F, 0.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.of(net.minecraft.world.item.Items.COPPER_INGOT));
@@ -102,15 +80,9 @@ public final class IaFCompat {
             BetterSurvival.LOGGER.warn("Failed to resolve IaF CE tiers: {}", e.getMessage());
             COPPER = SILVER = DRAGONBONE = FIRE_DRAGONBONE = ICE_DRAGONBONE = LIGHTNING_DRAGONBONE = null;
         }
-        // Dragon Steel tiers — hardcoded to match IaF CE defaults.
-        // We do NOT resolve repair ingredients here because RegistrySupplier.get()
-        // will throw at this point (IaF items not yet in Forge registry).
-        // Repair ingredient is only for anvil, so Ingredient.EMPTY is fine.
-        // Values: harvestLevel=4, durability=4000, speed=4.0, damage=10.0,
-        // enchantability=10
+
         try {
-            // IaF presence is already asserted when `init()` is called, no need for
-            // dangerous Class.forName() checks.
+
             FIRE_DRAGONSTEEL = new net.minecraftforge.common.ForgeTier(
                     4, 4000, 4.0F, 10.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
@@ -130,10 +102,6 @@ public final class IaFCompat {
         }
     }
 
-    /**
-     * Returns IaF tier entries for weapon registration.
-     * Called from {@code ModItems} static block.
-     */
     public static List<IafTierEntry> getIafTierEntries() {
         init();
         List<IafTierEntry> list = new ArrayList<>();
@@ -158,19 +126,6 @@ public final class IaFCompat {
         return list;
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Material Modifier (damage bonus + effects)
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Compute IaF material bonus damage and apply on-hit effects.
-     *
-     * @param stack        the weapon ItemStack
-     * @param target       the entity being hit
-     * @param attacker     the attacking player (may be null for spears)
-     * @param applyEffects whether to apply on-hit effects (false for thrown spears)
-     * @return bonus damage to add
-     */
     public static float getMaterialModifier(ItemStack stack, LivingEntity target,
             @Nullable Player attacker, boolean applyEffects) {
         if (!(stack.getItem() instanceof CustomWeaponItem weapon))
@@ -221,24 +176,15 @@ public final class IaFCompat {
             if (isFireDragon(target) || isIceDragon(target))
                 return 6.0F;
         }
-        // DRAGONBONE (plain) has no special effect
+
         return 0.0F;
     }
 
-    /** Convenience overload — applies effects by default. */
     public static float getMaterialModifier(ItemStack stack, LivingEntity target,
             @Nullable Player attacker) {
         return getMaterialModifier(stack, target, attacker, true);
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Effects
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Apply IaF CE's freeze effect via reflection.
-     * Calls: IafEntityData.get(target).frozenData.setFrozen(target, duration)
-     */
     private static void applyFreezeEffect(LivingEntity target, int duration) {
         try {
             Class<?> dataClass = Class.forName("com.iafenvoy.iceandfire.data.component.IafEntityData");
@@ -248,14 +194,14 @@ public final class IaFCompat {
                     .getMethod("setFrozen", LivingEntity.class, int.class)
                     .invoke(frozenData, target, duration);
         } catch (Exception e) {
-            // Fallback: just apply slowness
+
             BetterSurvival.LOGGER.debug("Failed to apply IaF freeze: {}", e.getMessage());
         }
     }
 
     private static void triggerChainLightning(LivingEntity target, Entity attacker) {
         if (!BetterSurvival.isJMixinLoaded) {
-            // Fallback: Summon a vanilla lightning bolt if JMixin is not installed
+
             if (!target.level().isClientSide
                     && target.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT
@@ -265,8 +211,7 @@ public final class IaFCompat {
                     if (attacker instanceof net.minecraft.server.level.ServerPlayer sp) {
                         bolt.setCause(sp);
                     }
-                    // Add IaF CE's standard tag to prevent loot destruction if its event handler
-                    // catches it
+
                     bolt.addTag("IceAndFire_DontDestroyLoot");
                     serverLevel.addFreshEntity(bolt);
                 }
@@ -284,10 +229,6 @@ public final class IaFCompat {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Entity type checks
-    // ══════════════════════════════════════════════════════════════════
-
     public static boolean isFireDragon(Entity entity) {
         return entity.getClass().getName().contains("EntityFireDragon");
     }
@@ -296,19 +237,12 @@ public final class IaFCompat {
         return entity.getClass().getName().contains("EntityIceDragon");
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // Tooltips
-    // ══════════════════════════════════════════════════════════════════
-
-    /**
-     * Add material-specific tooltip lines to a BS weapon.
-     */
     public static void addMaterialTooltip(Tier tier, List<Component> tooltip) {
         if (tier == SILVER) {
             tooltip.add(Component.translatable("silvertools.hurt")
                     .withStyle(ChatFormatting.GREEN));
         } else if (tier == DRAGONBONE) {
-            // Plain dragonbone has no tooltip
+
         } else if (tier == FIRE_DRAGONBONE) {
             tooltip.add(Component.translatable("dragon_sword_fire.hurt1")
                     .withStyle(ChatFormatting.GREEN));

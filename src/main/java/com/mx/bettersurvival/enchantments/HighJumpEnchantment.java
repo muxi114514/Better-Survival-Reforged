@@ -13,9 +13,6 @@ public class HighJumpEnchantment extends Enchantment {
         super(Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET });
     }
 
-    /**
-     * Called during LivingEvent.LivingJumpEvent to boost jump height.
-     */
     public static void boostJump(LivingEntity jumper, int level) {
         Vec3 motion = jumper.getDeltaMovement();
         jumper.setDeltaMovement(motion.x, motion.y + ((double) level) / 10.0D, motion.z);

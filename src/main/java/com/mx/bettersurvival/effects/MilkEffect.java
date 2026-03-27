@@ -9,14 +9,10 @@ import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 
-/**
- * Milk effect – instant, clears all curable potion effects (same as drinking
- * milk).
- */
 public class MilkEffect extends InstantenousMobEffect {
 
     public MilkEffect() {
-        super(MobEffectCategory.BENEFICIAL, 0xFFFFFF); // white
+        super(MobEffectCategory.BENEFICIAL, 0xFFFFFF);
     }
 
     @Override

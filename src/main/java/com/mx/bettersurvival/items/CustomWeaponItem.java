@@ -27,11 +27,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Base class for all BetterSurvival custom weapons.
- * Replaces the 1.12.2 ItemCustomWeapon which extended Item with manual
- * attribute handling.
- */
 public class CustomWeaponItem extends Item {
 
     protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
@@ -100,10 +95,6 @@ public class CustomWeaponItem extends Item {
         return slot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(slot);
     }
 
-    /**
-     * Allows sword enchantments to be applied at the enchanting table.
-     * Excludes Sweeping Edge.
-     */
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         if (enchantment != Enchantments.SWEEPING_EDGE && enchantment.category == EnchantmentCategory.WEAPON) {
@@ -116,20 +107,16 @@ public class CustomWeaponItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         addVenomTooltip(stack, tooltip);
-        // IaF CE material tooltip
+
         if (BetterSurvival.isIafLoaded) {
             com.mx.bettersurvival.integration.IaFCompat.addMaterialTooltip(this.tier, tooltip);
         }
-        // Defiled Lands material tooltip
+
         if (BetterSurvival.isDefiledLoaded) {
             com.mx.bettersurvival.integration.DefiledCompat.appendTooltip(stack, tooltip);
         }
     }
 
-    /**
-     * Adds venom tooltip lines to any weapon. Can be called from external tooltip
-     * events too.
-     */
     public static void addVenomTooltip(ItemStack stack, List<Component> tooltip) {
         if (!stack.hasTag() || !stack.getTag().contains("remainingPotionHits"))
             return;
@@ -141,7 +128,6 @@ public class CustomWeaponItem extends Item {
         if (potion == net.minecraft.world.item.alchemy.Potions.EMPTY)
             return;
 
-        // Get potion display name from its first effect
         String potionName;
         if (!potion.getEffects().isEmpty()) {
             potionName = Component.translatable(potion.getEffects().get(0).getDescriptionId()).getString();
@@ -149,8 +135,6 @@ public class CustomWeaponItem extends Item {
             potionName = potion.getName("");
         }
 
-        // Max hits = 50 if stacked, 10 for a single application
-        // We track actual max by ceil to nearest 10
         int maxHits = ((remaining + 9) / 10) * 10;
         if (maxHits < 10)
             maxHits = 10;
