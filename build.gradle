@@ -62,11 +62,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    // IaF CE and its dependencies (optional at runtime, needed at compile time)
+    // Original IaF and its dependency Citadel (optional at runtime, needed at compile time)
     compileOnly files(
-        'libs/iaf-IceAndFireCE-1.2.5-1.20.1-forge.jar',
-        'libs/iaf-jupiter-2.3.6-1.20.1-forge.jar',
-        'libs/iaf-uranus-2.2.6-1.20.1-forge.jar'
+        'libs/iceandfire-2.1.13-1.20.1-beta-5.jar',
+        'libs/citadel-2.6.3-1.20.1.jar'
     )
     // JMixin (for chain lightning — BS calls JMixin's API directly)
     compileOnly files('libs/JMixin.jar')
