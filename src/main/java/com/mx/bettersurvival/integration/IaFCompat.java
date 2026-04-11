@@ -229,62 +229,42 @@ public final class IaFCompat {
     private static void applyMeltEffect(LivingEntity target, @Nullable LivingEntity attacker,
             float weaponDamage, int durationTicks) {
         try {
-            Class<?> meltClass = Class.forName(
-                    "com.github.alexthe666.iceandfire.effect.MobEffectMelt");
-            java.lang.reflect.Method applyMethod = meltClass.getMethod(
-                    "applyMelt", LivingEntity.class, LivingEntity.class,
-                    float.class, int.class);
-            applyMethod.invoke(null, target, attacker, weaponDamage, durationTicks);
-        } catch (Exception e) {
+            com.github.alexthe666.iceandfire.effect.MobEffectMelt.applyMelt(target, attacker, weaponDamage, durationTicks);
+        } catch (Throwable e) {
             // 降级: 使用原版着火效果
             target.setSecondsOnFire(5);
-            BetterSurvival.LOGGER.debug("RLC Melt fallback to setSecondsOnFire: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("RLC Melt fallback to setSecondsOnFire. Cause: {}", e.toString());
         }
     }
 
     /**
      * 冰噬效果 — 叠层到阈值触发冰碎爆发
-     * 反射调用: MobEffectFrostbite.applyFrostbite(target, attacker, durationTicks, baseDamage)
      */
     private static void applyFrostbiteEffect(LivingEntity target, @Nullable LivingEntity attacker,
             int durationTicks, float baseDamage) {
         try {
-            Class<?> frostClass = Class.forName(
-                    "com.github.alexthe666.iceandfire.effect.MobEffectFrostbite");
-            java.lang.reflect.Method applyMethod = frostClass.getMethod(
-                    "applyFrostbite", LivingEntity.class, LivingEntity.class,
-                    int.class, float.class);
-            applyMethod.invoke(null, target, attacker, durationTicks, baseDamage);
-        } catch (Exception e) {
+            com.github.alexthe666.iceandfire.effect.MobEffectFrostbite.applyFrostbite(target, attacker, durationTicks, baseDamage);
+        } catch (Throwable e) {
             // 降级: 使用原版缓慢效果
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
             target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
-            BetterSurvival.LOGGER.debug("RLC Frostbite fallback to slowness: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("RLC Frostbite fallback to slowness. Cause: {}", e.toString());
         }
     }
 
     /**
      * 链式闪电 — 多目标跳跃 + 蓄电叠层
-     * 反射调用: ChainLightningUtils.createChainLightning(level, target, attacker, baseDamage)
      */
     private static void applyChainLightning(LivingEntity target, Entity attacker, float baseDamage) {
         if (target.level().isClientSide)
             return;
 
         try {
-            Class<?> chainClass = Class.forName(
-                    "com.github.alexthe666.iceandfire.api.ChainLightningUtils");
-            java.lang.reflect.Method createMethod = chainClass.getMethod(
-                    "createChainLightning",
-                    net.minecraft.world.level.Level.class,
-                    LivingEntity.class,
-                    Entity.class,
-                    float.class);
-            createMethod.invoke(null, target.level(), target, attacker, baseDamage);
-        } catch (Exception e) {
+            com.github.alexthe666.iceandfire.api.ChainLightningUtils.createChainLightning(target.level(), target, attacker, baseDamage);
+        } catch (Throwable e) {
             // 降级: JMixin链闪 或 原版闪电
             triggerFallbackLightning(target, attacker);
-            BetterSurvival.LOGGER.debug("RLC ChainLightning fallback: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("RLC ChainLightning fallback. Cause: {}", e.toString());
         }
     }
 
