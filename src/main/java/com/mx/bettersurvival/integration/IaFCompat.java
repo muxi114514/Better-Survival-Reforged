@@ -187,24 +187,26 @@ public final class IaFCompat {
 
     private static void applyFreezeEffect(LivingEntity target, int duration) {
         try {
-            // 原版IaF: EntityDataProvider.getCapability(Entity) -> LazyOptional<EntityData>
+            // EntityDataProvider.getCapability(Entity) -> LazyOptional<EntityData>
             Class<?> providerClass = Class.forName(
                     "com.github.alexthe666.iceandfire.entity.props.EntityDataProvider");
             java.lang.reflect.Method getCapMethod = providerClass.getMethod(
                     "getCapability", net.minecraft.world.entity.Entity.class);
             Object lazyOptional = getCapMethod.invoke(null, target);
-            // LazyOptional.orElse(null) -> EntityData
-            java.lang.reflect.Method orElseMethod = lazyOptional.getClass()
-                    .getMethod("orElse", Object.class);
-            Object entityData = orElseMethod.invoke(lazyOptional, (Object) null);
-            if (entityData != null) {
+
+            // LazyOptional.resolve() -> Optional<EntityData>（无泛型擦除问题）
+            java.lang.reflect.Method resolveMethod = lazyOptional.getClass().getMethod("resolve");
+            java.util.Optional<?> optional = (java.util.Optional<?>) resolveMethod.invoke(lazyOptional);
+
+            if (optional.isPresent()) {
+                Object entityData = optional.get();
                 Object frozenData = entityData.getClass().getField("frozenData").get(entityData);
                 frozenData.getClass()
                         .getMethod("setFrozen", LivingEntity.class, int.class)
                         .invoke(frozenData, target, duration);
             }
         } catch (Exception e) {
-            BetterSurvival.LOGGER.debug("Failed to apply IaF freeze: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("Failed to apply IaF freeze: {}", e.getMessage());
         }
     }
 
