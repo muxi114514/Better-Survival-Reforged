@@ -17,20 +17,31 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RLC IaF 兼容层 — 使用RLC版独有的效果系统:
+ * 火系: MobEffectMelt（熔蚀叠层减甲）
+ * 冰系: MobEffectFrostbite（冰噬叠层冰碎）
+ * 电系: ChainLightningUtils + MobEffectVoltage（链闪+蓄电放电）
+ * 金龙钢: 圣铭之力（魔法伤害+发光）
+ */
 public final class IaFCompat {
 
     private IaFCompat() {
     }
 
+    // 基础材料Tier
     private static Tier COPPER;
     private static Tier SILVER;
     private static Tier DRAGONBONE;
     private static Tier FIRE_DRAGONBONE;
     private static Tier ICE_DRAGONBONE;
     private static Tier LIGHTNING_DRAGONBONE;
+
+    // 龙钢Tier
     private static Tier FIRE_DRAGONSTEEL;
     private static Tier ICE_DRAGONSTEEL;
     private static Tier LIGHTNING_DRAGONSTEEL;
+    private static Tier GOLD_DRAGONSTEEL;
 
     private static boolean initialized = false;
 
@@ -41,8 +52,9 @@ public final class IaFCompat {
         if (initialized)
             return;
         initialized = true;
-        try {
 
+        // 基础材料Tier初始化
+        try {
             COPPER = new net.minecraftforge.common.ForgeTier(2, 300, 0.7F, 0.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.of(net.minecraft.world.item.Items.COPPER_INGOT));
@@ -75,14 +87,14 @@ public final class IaFCompat {
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.EMPTY);
 
-            BetterSurvival.LOGGER.info("IaF tiers resolved successfully via ForgeTier proxy.");
+            BetterSurvival.LOGGER.info("RLC IaF tiers resolved successfully via ForgeTier proxy.");
         } catch (Exception e) {
-            BetterSurvival.LOGGER.warn("Failed to resolve IaF tiers: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("Failed to resolve RLC IaF tiers: {}", e.getMessage());
             COPPER = SILVER = DRAGONBONE = FIRE_DRAGONBONE = ICE_DRAGONBONE = LIGHTNING_DRAGONBONE = null;
         }
 
+        // 龙钢Tier初始化（含金龙钢）
         try {
-
             FIRE_DRAGONSTEEL = new net.minecraftforge.common.ForgeTier(
                     4, 4000, 4.0F, 10.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
@@ -95,10 +107,15 @@ public final class IaFCompat {
                     4, 4000, 4.0F, 10.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.EMPTY);
-            BetterSurvival.LOGGER.info("IaF Dragon Steel tiers created successfully.");
+            GOLD_DRAGONSTEEL = new net.minecraftforge.common.ForgeTier(
+                    4, 4000, 4.0F, 10.0F, 10,
+                    net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
+                    () -> net.minecraft.world.item.crafting.Ingredient.EMPTY);
+
+            BetterSurvival.LOGGER.info("RLC IaF Dragon Steel tiers created (including Gold).");
         } catch (Exception e) {
-            BetterSurvival.LOGGER.warn("Failed to create IaF Dragon Steel tiers: {}", e.getMessage());
-            FIRE_DRAGONSTEEL = ICE_DRAGONSTEEL = LIGHTNING_DRAGONSTEEL = null;
+            BetterSurvival.LOGGER.warn("Failed to create RLC IaF Dragon Steel tiers: {}", e.getMessage());
+            FIRE_DRAGONSTEEL = ICE_DRAGONSTEEL = LIGHTNING_DRAGONSTEEL = GOLD_DRAGONSTEEL = null;
         }
     }
 
@@ -123,58 +140,74 @@ public final class IaFCompat {
             list.add(new IafTierEntry(ICE_DRAGONSTEEL, "icedragonsteel"));
         if (LIGHTNING_DRAGONSTEEL != null)
             list.add(new IafTierEntry(LIGHTNING_DRAGONSTEEL, "lightningdragonsteel"));
+        if (GOLD_DRAGONSTEEL != null)
+            list.add(new IafTierEntry(GOLD_DRAGONSTEEL, "golddragonsteel"));
         return list;
     }
+
+    // ════════════════════════════════════════════════════════
+    // 效果应用
+    // ════════════════════════════════════════════════════════
 
     public static float getMaterialModifier(ItemStack stack, LivingEntity target,
             @Nullable Player attacker, boolean applyEffects) {
         if (!(stack.getItem() instanceof CustomWeaponItem weapon))
             return 0.0F;
         Tier tier = weapon.getTier();
+        float baseDamage = weapon.getAttackDamage();
 
+        // 银 — 碎灵
         if (tier == SILVER) {
             if (target.getMobType() == MobType.UNDEAD)
                 return 2.0F;
-        } else if (tier == FIRE_DRAGONBONE) {
-            if (applyEffects) {
-                target.setSecondsOnFire(5);
-            }
+        }
+        // 火龙骨 — 熔蚀
+        else if (tier == FIRE_DRAGONBONE) {
+            if (applyEffects)
+                applyMeltEffect(target, attacker, baseDamage, 120);
             if (isIceDragon(target))
                 return 8.0F;
-        } else if (tier == ICE_DRAGONBONE) {
-            if (applyEffects) {
-                applyFreezeEffect(target, 200);
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
-                target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
-            }
+        }
+        // 冰龙骨 — 冰噬
+        else if (tier == ICE_DRAGONBONE) {
+            if (applyEffects)
+                applyFrostbiteEffect(target, attacker, 200, baseDamage);
             if (isFireDragon(target))
                 return 8.0F;
-        } else if (tier == LIGHTNING_DRAGONBONE) {
-            if (applyEffects && attacker != null) {
-                triggerChainLightning(target, attacker);
-            }
+        }
+        // 雷龙骨 — 链式闪电+蓄电
+        else if (tier == LIGHTNING_DRAGONBONE) {
+            if (applyEffects && attacker != null)
+                applyChainLightning(target, attacker, baseDamage);
             if (isFireDragon(target) || isIceDragon(target))
                 return 4.0F;
-        } else if (tier == FIRE_DRAGONSTEEL) {
-            if (applyEffects) {
-                target.setSecondsOnFire(8);
-            }
+        }
+        // 火龙钢 — 强化熔蚀
+        else if (tier == FIRE_DRAGONSTEEL) {
+            if (applyEffects)
+                applyMeltEffect(target, attacker, baseDamage, 160);
             if (isIceDragon(target))
                 return 12.0F;
-        } else if (tier == ICE_DRAGONSTEEL) {
-            if (applyEffects) {
-                applyFreezeEffect(target, 300);
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 140, 3));
-                target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 140, 3));
-            }
+        }
+        // 冰龙钢 — 强化冰噬
+        else if (tier == ICE_DRAGONSTEEL) {
+            if (applyEffects)
+                applyFrostbiteEffect(target, attacker, 200, baseDamage);
             if (isFireDragon(target))
                 return 12.0F;
-        } else if (tier == LIGHTNING_DRAGONSTEEL) {
-            if (applyEffects && attacker != null) {
-                triggerChainLightning(target, attacker);
-            }
+        }
+        // 雷龙钢 — 强化链闪
+        else if (tier == LIGHTNING_DRAGONSTEEL) {
+            if (applyEffects && attacker != null)
+                applyChainLightning(target, attacker, baseDamage);
             if (isFireDragon(target) || isIceDragon(target))
                 return 6.0F;
+        }
+        // 金龙钢 — 圣铭之力
+        else if (tier == GOLD_DRAGONSTEEL) {
+            if (applyEffects) {
+                applyGoldDragonsteelEffect(target, attacker, baseDamage);
+            }
         }
 
         return 0.0F;
@@ -185,58 +218,121 @@ public final class IaFCompat {
         return getMaterialModifier(stack, target, attacker, true);
     }
 
-    private static void applyFreezeEffect(LivingEntity target, int duration) {
+    // ════════════════════════════════════════════════════════
+    // RLC IaF效果 — 反射调用
+    // ════════════════════════════════════════════════════════
+
+    /**
+     * 熔蚀效果 — 叠层减甲+持续魔法伤害
+     * 反射调用: MobEffectMelt.applyMelt(target, attacker, weaponDamage, durationTicks)
+     */
+    private static void applyMeltEffect(LivingEntity target, @Nullable LivingEntity attacker,
+            float weaponDamage, int durationTicks) {
         try {
-            // 原版IaF: EntityDataProvider.getCapability(Entity) -> LazyOptional<EntityData>
-            Class<?> providerClass = Class.forName(
-                    "com.github.alexthe666.iceandfire.entity.props.EntityDataProvider");
-            java.lang.reflect.Method getCapMethod = providerClass.getMethod(
-                    "getCapability", net.minecraft.world.entity.Entity.class);
-            Object lazyOptional = getCapMethod.invoke(null, target);
-            // LazyOptional.orElse(null) -> EntityData
-            java.lang.reflect.Method orElseMethod = lazyOptional.getClass()
-                    .getMethod("orElse", Object.class);
-            Object entityData = orElseMethod.invoke(lazyOptional, (Object) null);
-            if (entityData != null) {
-                Object frozenData = entityData.getClass().getField("frozenData").get(entityData);
-                frozenData.getClass()
-                        .getMethod("setFrozen", LivingEntity.class, int.class)
-                        .invoke(frozenData, target, duration);
-            }
+            Class<?> meltClass = Class.forName(
+                    "com.github.alexthe666.iceandfire.effect.MobEffectMelt");
+            java.lang.reflect.Method applyMethod = meltClass.getMethod(
+                    "applyMelt", LivingEntity.class, LivingEntity.class,
+                    float.class, int.class);
+            applyMethod.invoke(null, target, attacker, weaponDamage, durationTicks);
         } catch (Exception e) {
-            BetterSurvival.LOGGER.debug("Failed to apply IaF freeze: {}", e.getMessage());
+            // 降级: 使用原版着火效果
+            target.setSecondsOnFire(5);
+            BetterSurvival.LOGGER.debug("RLC Melt fallback to setSecondsOnFire: {}", e.getMessage());
         }
     }
 
-    private static void triggerChainLightning(LivingEntity target, Entity attacker) {
-        if (!BetterSurvival.isJMixinLoaded) {
-
-            if (!target.level().isClientSide
-                    && target.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT
-                        .create(serverLevel);
-                if (bolt != null) {
-                    bolt.moveTo(target.position());
-                    if (attacker instanceof net.minecraft.server.level.ServerPlayer sp) {
-                        bolt.setCause(sp);
-                    }
-
-                    bolt.addTag("IceAndFire_DontDestroyLoot");
-                    serverLevel.addFreshEntity(bolt);
-                }
-            }
-            return;
+    /**
+     * 冰噬效果 — 叠层到阈值触发冰碎爆发
+     * 反射调用: MobEffectFrostbite.applyFrostbite(target, attacker, durationTicks, baseDamage)
+     */
+    private static void applyFrostbiteEffect(LivingEntity target, @Nullable LivingEntity attacker,
+            int durationTicks, float baseDamage) {
+        try {
+            Class<?> frostClass = Class.forName(
+                    "com.github.alexthe666.iceandfire.effect.MobEffectFrostbite");
+            java.lang.reflect.Method applyMethod = frostClass.getMethod(
+                    "applyFrostbite", LivingEntity.class, LivingEntity.class,
+                    int.class, float.class);
+            applyMethod.invoke(null, target, attacker, durationTicks, baseDamage);
+        } catch (Exception e) {
+            // 降级: 使用原版缓慢效果
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
+            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
+            BetterSurvival.LOGGER.debug("RLC Frostbite fallback to slowness: {}", e.getMessage());
         }
+    }
 
+    /**
+     * 链式闪电 — 多目标跳跃 + 蓄电叠层
+     * 反射调用: ChainLightningUtils.createChainLightning(level, target, attacker, baseDamage)
+     */
+    private static void applyChainLightning(LivingEntity target, Entity attacker, float baseDamage) {
         if (target.level().isClientSide)
             return;
+
         try {
-            com.mx.jmixin.lightning.ChainLightningUtils.createChainLightning(
-                    target.level(), target, attacker);
+            Class<?> chainClass = Class.forName(
+                    "com.github.alexthe666.iceandfire.api.ChainLightningUtils");
+            java.lang.reflect.Method createMethod = chainClass.getMethod(
+                    "createChainLightning",
+                    net.minecraft.world.level.Level.class,
+                    LivingEntity.class,
+                    Entity.class,
+                    float.class);
+            createMethod.invoke(null, target.level(), target, attacker, baseDamage);
         } catch (Exception e) {
-            BetterSurvival.LOGGER.debug("Chain lightning failed: {}", e.getMessage());
+            // 降级: JMixin链闪 或 原版闪电
+            triggerFallbackLightning(target, attacker);
+            BetterSurvival.LOGGER.debug("RLC ChainLightning fallback: {}", e.getMessage());
         }
     }
+
+    /**
+     * 闪电降级: JMixin → 原版LightningBolt
+     */
+    private static void triggerFallbackLightning(LivingEntity target, Entity attacker) {
+        if (BetterSurvival.isJMixinLoaded) {
+            try {
+                com.mx.jmixin.lightning.ChainLightningUtils.createChainLightning(
+                        target.level(), target, attacker);
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        if (target.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            net.minecraft.world.entity.LightningBolt bolt =
+                    net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(serverLevel);
+            if (bolt != null) {
+                bolt.moveTo(target.position());
+                if (attacker instanceof net.minecraft.server.level.ServerPlayer sp) {
+                    bolt.setCause(sp);
+                }
+                bolt.addTag("IceAndFire_DontDestroyLoot");
+                serverLevel.addFreshEntity(bolt);
+            }
+        }
+    }
+
+    /**
+     * 金龙钢 — 圣铭之力: 魔法伤害 + 正面效果增伤 + 发光
+     */
+    private static void applyGoldDragonsteelEffect(LivingEntity target,
+            @Nullable LivingEntity attacker, float baseDamage) {
+        float bonusDamage = 0;
+        // 目标身上有正面效果时增伤30%
+        if (target.getActiveEffects().stream().anyMatch(e -> e.getEffect().isBeneficial())) {
+            bonusDamage = baseDamage * 0.3F;
+        }
+        if (attacker != null) {
+            target.hurt(attacker.level().damageSources().magic(), baseDamage * 0.5F + bonusDamage);
+        }
+        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60, 0));
+    }
+
+    // ════════════════════════════════════════════════════════
+    // 工具方法
+    // ════════════════════════════════════════════════════════
 
     public static boolean isFireDragon(Entity entity) {
         return entity.getClass().getName().contains("EntityFireDragon");
@@ -251,37 +347,25 @@ public final class IaFCompat {
             tooltip.add(Component.translatable("silvertools.hurt")
                     .withStyle(ChatFormatting.GREEN));
         } else if (tier == DRAGONBONE) {
-
-        } else if (tier == FIRE_DRAGONBONE) {
+            // 普通龙骨无特殊提示
+        } else if (tier == FIRE_DRAGONBONE || tier == FIRE_DRAGONSTEEL) {
             tooltip.add(Component.translatable("dragon_sword_fire.hurt1")
                     .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("dragon_sword_fire.hurt2")
                     .withStyle(ChatFormatting.DARK_RED));
-        } else if (tier == ICE_DRAGONBONE) {
+        } else if (tier == ICE_DRAGONBONE || tier == ICE_DRAGONSTEEL) {
             tooltip.add(Component.translatable("dragon_sword_ice.hurt1")
                     .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("dragon_sword_ice.hurt2")
                     .withStyle(ChatFormatting.AQUA));
-        } else if (tier == LIGHTNING_DRAGONBONE) {
+        } else if (tier == LIGHTNING_DRAGONBONE || tier == LIGHTNING_DRAGONSTEEL) {
             tooltip.add(Component.translatable("dragon_sword_lightning.hurt1")
                     .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("dragon_sword_lightning.hurt2")
                     .withStyle(ChatFormatting.DARK_PURPLE));
-        } else if (tier == FIRE_DRAGONSTEEL) {
-            tooltip.add(Component.translatable("dragon_sword_fire.hurt1")
-                    .withStyle(ChatFormatting.GREEN));
-            tooltip.add(Component.translatable("dragon_sword_fire.hurt2")
-                    .withStyle(ChatFormatting.DARK_RED));
-        } else if (tier == ICE_DRAGONSTEEL) {
-            tooltip.add(Component.translatable("dragon_sword_ice.hurt1")
-                    .withStyle(ChatFormatting.GREEN));
-            tooltip.add(Component.translatable("dragon_sword_ice.hurt2")
-                    .withStyle(ChatFormatting.AQUA));
-        } else if (tier == LIGHTNING_DRAGONSTEEL) {
-            tooltip.add(Component.translatable("dragon_sword_lightning.hurt1")
-                    .withStyle(ChatFormatting.GREEN));
-            tooltip.add(Component.translatable("dragon_sword_lightning.hurt2")
-                    .withStyle(ChatFormatting.DARK_PURPLE));
+        } else if (tier == GOLD_DRAGONSTEEL) {
+            tooltip.add(Component.translatable("dragon_sword_gold.hurt2")
+                    .withStyle(ChatFormatting.GOLD));
         }
     }
 }

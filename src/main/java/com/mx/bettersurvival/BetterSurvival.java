@@ -39,7 +39,7 @@ public class BetterSurvival {
                 isDefiledLoaded = net.minecraftforge.fml.ModList.get().isLoaded("defiledlands");
                 isJMixinLoaded = net.minecraftforge.fml.ModList.get().isLoaded("jmixin");
                 if (isIafLoaded)
-                        LOGGER.info("IaF detected — BS weapons will use IaF materials.");
+                        LOGGER.info("RLC IaF detected — BS weapons will use IaF materials (with RLC effects).");
                 if (isDefiledLoaded)
                         LOGGER.info("Defiled Lands detected — BS weapons will use Defiled materials.");
                 if (isJMixinLoaded)
