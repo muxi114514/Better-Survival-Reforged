@@ -136,7 +136,12 @@ public class CommonEventHandler {
         LivingEntity target = event.getEntity();
         ItemStack weapon = attacker.getMainHandItem();
 
-        if (weapon.getItem() instanceof DaggerItem dagger) {
+        // 过滤非直接近战伤害（如Melt/Frostbite的indirectMagic tick），
+        // 避免药效持续伤害被误判为玩家攻击从而叠加/串联元素效果
+        boolean isDirectAttack = event.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
+                || event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MOB_ATTACK);
+
+        if (weapon.getItem() instanceof DaggerItem dagger && isDirectAttack) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.ASSASSINATE.get());
             if (level > 0) {
                 float backstabMult = dagger.getBackstabMultiplier(attacker, target);
@@ -147,7 +152,7 @@ public class CommonEventHandler {
             }
         }
 
-        if (weapon.getItem() instanceof HammerItem) {
+        if (weapon.getItem() instanceof HammerItem && isDirectAttack) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.BASH.get());
             double stunChance = ModConfig.COMMON.stunBaseChance.get()
                     + level * ModConfig.COMMON.bashModifier.get();
@@ -159,7 +164,7 @@ public class CommonEventHandler {
             }
         }
 
-        if (weapon.getItem() instanceof BattleAxeItem) {
+        if (weapon.getItem() instanceof BattleAxeItem && isDirectAttack) {
             int level = weapon.getEnchantmentLevel(ModEnchantments.DISARM.get());
             if (level > 0 && attacker.getAttackStrengthScale(0.5F) > 0.9F) {
                 double disarmChance = ModConfig.COMMON.disarmBaseChance.get()
@@ -174,25 +179,25 @@ public class CommonEventHandler {
             }
         }
 
-        if (weapon.getItem() instanceof NunchakuItem) {
+        if (weapon.getItem() instanceof NunchakuItem && isDirectAttack) {
             attacker.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
                 event.setAmount(event.getAmount() * (combo.getComboPower() + 1.0F));
             });
         }
 
-        if (BetterSurvival.isIafLoaded && weapon.getItem() instanceof CustomWeaponItem) {
+        if (isDirectAttack && BetterSurvival.isIafLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             float bonus = com.mx.bettersurvival.integration.IaFCompat.getMaterialModifier(weapon, target, attacker);
             if (bonus > 0.0F) {
                 event.setAmount(event.getAmount() + bonus);
             }
         }
 
-        if (weapon.getItem() instanceof CustomWeaponItem cw
+        if (isDirectAttack && weapon.getItem() instanceof CustomWeaponItem cw
                 && cw.getTier() == com.mx.bettersurvival.init.ModTiers.CRYING_OBSIDIAN) {
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
         }
 
-        if (BetterSurvival.isDefiledLoaded && weapon.getItem() instanceof CustomWeaponItem) {
+        if (isDirectAttack && BetterSurvival.isDefiledLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             com.mx.bettersurvival.integration.DefiledCompat.applyOnHitEffect(
                     weapon, target, attacker, event.getAmount());
         }
