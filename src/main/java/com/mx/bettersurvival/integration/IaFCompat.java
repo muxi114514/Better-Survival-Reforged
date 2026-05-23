@@ -75,9 +75,9 @@ public final class IaFCompat {
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.EMPTY);
 
-            BetterSurvival.LOGGER.info("IaF CE tiers resolved successfully via ForgeTier proxy.");
+            BetterSurvival.LOGGER.info("IaF tiers resolved successfully via ForgeTier proxy.");
         } catch (Exception e) {
-            BetterSurvival.LOGGER.warn("Failed to resolve IaF CE tiers: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("Failed to resolve IaF tiers: {}", e.getMessage());
             COPPER = SILVER = DRAGONBONE = FIRE_DRAGONBONE = ICE_DRAGONBONE = LIGHTNING_DRAGONBONE = null;
         }
 
@@ -95,9 +95,9 @@ public final class IaFCompat {
                     4, 4000, 4.0F, 10.0F, 10,
                     net.minecraft.tags.BlockTags.NEEDS_DIAMOND_TOOL,
                     () -> net.minecraft.world.item.crafting.Ingredient.EMPTY);
-            BetterSurvival.LOGGER.info("IaF CE Dragon Steel tiers created successfully.");
+            BetterSurvival.LOGGER.info("IaF Dragon Steel tiers created successfully.");
         } catch (Exception e) {
-            BetterSurvival.LOGGER.warn("Failed to create IaF CE Dragon Steel tiers: {}", e.getMessage());
+            BetterSurvival.LOGGER.warn("Failed to create IaF Dragon Steel tiers: {}", e.getMessage());
             FIRE_DRAGONSTEEL = ICE_DRAGONSTEEL = LIGHTNING_DRAGONSTEEL = null;
         }
     }
@@ -187,15 +187,26 @@ public final class IaFCompat {
 
     private static void applyFreezeEffect(LivingEntity target, int duration) {
         try {
-            Class<?> dataClass = Class.forName("com.iafenvoy.iceandfire.data.component.IafEntityData");
-            Object data = dataClass.getMethod("get", LivingEntity.class).invoke(null, target);
-            Object frozenData = data.getClass().getField("frozenData").get(data);
-            frozenData.getClass()
-                    .getMethod("setFrozen", LivingEntity.class, int.class)
-                    .invoke(frozenData, target, duration);
-        } catch (Exception e) {
+            // EntityDataProvider.getCapability(Entity) -> LazyOptional<EntityData>
+            Class<?> providerClass = Class.forName(
+                    "com.github.alexthe666.iceandfire.entity.props.EntityDataProvider");
+            java.lang.reflect.Method getCapMethod = providerClass.getMethod(
+                    "getCapability", net.minecraft.world.entity.Entity.class);
+            Object lazyOptional = getCapMethod.invoke(null, target);
 
-            BetterSurvival.LOGGER.debug("Failed to apply IaF freeze: {}", e.getMessage());
+            // LazyOptional.resolve() -> Optional<EntityData>（无泛型擦除问题）
+            java.lang.reflect.Method resolveMethod = lazyOptional.getClass().getMethod("resolve");
+            java.util.Optional<?> optional = (java.util.Optional<?>) resolveMethod.invoke(lazyOptional);
+
+            if (optional.isPresent()) {
+                Object entityData = optional.get();
+                Object frozenData = entityData.getClass().getField("frozenData").get(entityData);
+                frozenData.getClass()
+                        .getMethod("setFrozen", LivingEntity.class, int.class)
+                        .invoke(frozenData, target, duration);
+            }
+        } catch (Exception e) {
+            BetterSurvival.LOGGER.warn("Failed to apply IaF freeze: {}", e.getMessage());
         }
     }
 
