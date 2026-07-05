@@ -180,5 +180,12 @@
     "item.bettersurvival.itemscarlitebattleaxe": "绯红宝石战斧",
     "item.bettersurvival.itemscarlitenunchaku": "绯红宝石双截棍",
     "defiled_weapon_umbrium.hurt": "击中施加流血效果",
-    "defiled_weapon_scarlite.hurt": "击中吸血 (吸血)"
+    "defiled_weapon_scarlite.hurt": "击中吸血 (吸血)",
+    "item.bettersurvival.itemetheriumhammer": "以太锤",
+    "item.bettersurvival.itemetheriumspear": "以太矛",
+    "item.bettersurvival.itemetheriumdagger": "以太匕首",
+    "item.bettersurvival.itemetheriumbattleaxe": "以太战斧",
+    "item.bettersurvival.itemetheriumnunchaku": "以太双截棍",
+    "enigmatic_weapon.etherium.shield": "以太护盾：命中抽取自身生命注入护盾，血量越低近战减伤/弹射免疫越强并击退攻击者",
+    "enigmatic_weapon.etherium.reach": "攻击距离提升"
 }

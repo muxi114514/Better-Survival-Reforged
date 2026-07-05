@@ -180,5 +180,12 @@
   "item.bettersurvival.itemscarlitebattleaxe": "Scarlite Battle Axe",
   "item.bettersurvival.itemscarlitenunchaku": "Scarlite Nunchaku",
   "defiled_weapon_umbrium.hurt": "Inflicts Bleeding on hit",
-  "defiled_weapon_scarlite.hurt": "Heals on hit (Vampirism)"
+  "defiled_weapon_scarlite.hurt": "Heals on hit (Vampirism)",
+  "item.bettersurvival.itemetheriumhammer": "Etherium Hammer",
+  "item.bettersurvival.itemetheriumspear": "Etherium Spear",
+  "item.bettersurvival.itemetheriumdagger": "Etherium Dagger",
+  "item.bettersurvival.itemetheriumbattleaxe": "Etherium Battle Axe",
+  "item.bettersurvival.itemetheriumnunchaku": "Etherium Nunchaku",
+  "enigmatic_weapon.etherium.shield": "Etherium Shield: hits drain your life into the shield; the lower your health, the stronger the melee/projectile mitigation and knockback",
+  "enigmatic_weapon.etherium.reach": "Increased attack reach"
 }
