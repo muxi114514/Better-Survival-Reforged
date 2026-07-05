@@ -32,18 +32,22 @@ public class BetterSurvival {
         public static boolean isIafLoaded;
         public static boolean isDefiledLoaded;
         public static boolean isJMixinLoaded;
+        public static boolean isEnigmaticLoaded;
 
         public BetterSurvival() {
 
                 isIafLoaded = net.minecraftforge.fml.ModList.get().isLoaded("iceandfire");
                 isDefiledLoaded = net.minecraftforge.fml.ModList.get().isLoaded("defiledlands");
                 isJMixinLoaded = net.minecraftforge.fml.ModList.get().isLoaded("jmixin");
+                isEnigmaticLoaded = net.minecraftforge.fml.ModList.get().isLoaded("enigmaticlegacy");
                 if (isIafLoaded)
                         LOGGER.info("RLC IaF detected — BS weapons will use IaF materials (with RLC effects).");
                 if (isDefiledLoaded)
                         LOGGER.info("Defiled Lands detected — BS weapons will use Defiled materials.");
                 if (isJMixinLoaded)
                         LOGGER.info("JMixin detected — chain lightning will be available.");
+                if (isEnigmaticLoaded)
+                        LOGGER.info("Enigmatic Legacy detected — BS will provide Etherium weapons.");
 
                 IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 

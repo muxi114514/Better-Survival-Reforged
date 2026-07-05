@@ -107,6 +107,18 @@ public class ModConfig {
 
                 public final ForgeConfigSpec.BooleanValue moddedMaterials;
 
+                // --- 以太材质（神秘遗物软依赖）：材料属性 + 以太护盾 ---
+                public final ForgeConfigSpec.IntValue etheriumHarvestLevel;
+                public final ForgeConfigSpec.IntValue etheriumDurability;
+                public final ForgeConfigSpec.DoubleValue etheriumSpeed;
+                public final ForgeConfigSpec.DoubleValue etheriumAttackDamage;
+                public final ForgeConfigSpec.IntValue etheriumEnchantability;
+                public final ForgeConfigSpec.DoubleValue etheriumShieldThreshold;
+                public final ForgeConfigSpec.DoubleValue etheriumShieldMaxReduction;
+                public final ForgeConfigSpec.DoubleValue etheriumDrainPercent;
+                public final ForgeConfigSpec.BooleanValue etheriumDrainEnabled;
+                public final ForgeConfigSpec.DoubleValue etheriumReachBonus;
+
                 CommonConfig(ForgeConfigSpec.Builder builder) {
 
                         builder.comment("Weapon settings").push("weapons");
@@ -245,6 +257,36 @@ public class ModConfig {
                         moddedMaterials = builder
                                         .comment("Allows you to craft weapons from materials commonly present in mods.")
                                         .define("moddedMaterials", true);
+
+                        builder.pop();
+
+                        builder.comment("Etherium material (Enigmatic Legacy soft dependency): stats + Etherium Shield")
+                                        .push("etherium");
+
+                        etheriumHarvestLevel = builder.comment("Harvest level of Etherium weapons.")
+                                        .defineInRange("etheriumHarvestLevel", 5, 0, 10);
+                        etheriumDurability = builder.comment("Durability (uses) of Etherium weapons.")
+                                        .defineInRange("etheriumDurability", 8888, 1, 100000);
+                        etheriumSpeed = builder.comment("Mining speed of Etherium weapons.")
+                                        .defineInRange("etheriumSpeed", 10.0, 0.0, 100.0);
+                        etheriumAttackDamage = builder.comment("Attack damage bonus of Etherium weapons.")
+                                        .defineInRange("etheriumAttackDamage", 8.0, 0.0, 100.0);
+                        etheriumEnchantability = builder.comment("Enchantability of Etherium weapons.")
+                                        .defineInRange("etheriumEnchantability", 35, 0, 100);
+                        etheriumShieldThreshold = builder.comment(
+                                        "Health fraction at/below which the Etherium shield reaches full strength (also the drain floor).")
+                                        .defineInRange("etheriumShieldThreshold", 0.40, 0.0, 1.0);
+                        etheriumShieldMaxReduction = builder
+                                        .comment("Melee damage reduction at full Etherium shield.")
+                                        .defineInRange("etheriumShieldMaxReduction", 0.50, 0.0, 1.0);
+                        etheriumDrainPercent = builder.comment(
+                                        "Fraction of max health drained per attack while above the shield threshold.")
+                                        .defineInRange("etheriumDrainPercent", 0.05, 0.0, 1.0);
+                        etheriumDrainEnabled = builder
+                                        .comment("Whether attacking with Etherium weapons drains your own health above the threshold.")
+                                        .define("etheriumDrainEnabled", true);
+                        etheriumReachBonus = builder.comment("Bonus attack reach while holding an Etherium weapon.")
+                                        .defineInRange("etheriumReachBonus", 1.0, 0.0, 16.0);
 
                         builder.pop();
                 }
