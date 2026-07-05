@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "  I",
+        " S ",
+        "S  "
+    ],
+    "key": {
+        "I": {
+            "item": "enigmaticlegacy:etherium_ingot"
+        },
+        "S": {
+            "item": "enigmaticlegacy:ender_rod"
+        }
+    },
+    "result": {
+        "item": "bettersurvival:itemetheriumspear",
+        "count": 4
+    }
+}

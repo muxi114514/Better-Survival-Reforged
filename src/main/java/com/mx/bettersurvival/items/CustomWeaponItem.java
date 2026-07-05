@@ -31,6 +31,8 @@ public class CustomWeaponItem extends Item {
 
     protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
     protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
+    // 固定 UUID：以太攻击距离加成（主副手不叠加）
+    private static final UUID ETHERIUM_REACH_UUID = UUID.fromString("b7e2a3c4-1d5e-4f60-8a91-2c3d4e5f6a70");
 
     private final float attackDamage;
     private final double attackSpeed;
@@ -50,6 +52,16 @@ public class CustomWeaponItem extends Item {
         builder.put(Attributes.ATTACK_SPEED,
                 new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", this.attackSpeed,
                         AttributeModifier.Operation.ADDITION));
+
+        // 以太·持握 +攻击距离（矛已自带 reach 并覆盖本方法，故此处只作用于锤/匕首/战斧/双截棍）
+        if (com.mx.bettersurvival.integration.EnigmaticCompat.isEtheriumTier(tier)) {
+            double reach = com.mx.bettersurvival.integration.EnigmaticCompat.cfgReachBonus();
+            if (reach > 0) {
+                builder.put(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get(),
+                        new AttributeModifier(ETHERIUM_REACH_UUID, "bettersurvival:etherium_reach", reach,
+                                AttributeModifier.Operation.ADDITION));
+            }
+        }
         this.defaultModifiers = builder.build();
     }
 
@@ -114,6 +126,10 @@ public class CustomWeaponItem extends Item {
 
         if (BetterSurvival.isDefiledLoaded) {
             com.mx.bettersurvival.integration.DefiledCompat.appendTooltip(stack, tooltip);
+        }
+
+        if (BetterSurvival.isEnigmaticLoaded) {
+            com.mx.bettersurvival.integration.EnigmaticCompat.appendTooltip(stack, tooltip);
         }
     }
 

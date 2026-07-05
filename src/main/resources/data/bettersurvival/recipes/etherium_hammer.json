@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " II",
+        "SII",
+        " II"
+    ],
+    "key": {
+        "I": {
+            "item": "enigmaticlegacy:etherium_ingot"
+        },
+        "S": {
+            "item": "enigmaticlegacy:ender_rod"
+        }
+    },
+    "result": {
+        "item": "bettersurvival:itemetheriumhammer"
+    }
+}

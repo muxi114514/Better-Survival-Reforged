@@ -61,6 +61,15 @@ public class ModItems {
                                 registerWeaponsForTier(dEntry.tier(), dEntry.name());
                         }
                 }
+
+                boolean enigmaticPresent = net.minecraftforge.fml.ModList.get().isLoaded("enigmaticlegacy");
+
+                if (enigmaticPresent) {
+                        for (com.mx.bettersurvival.integration.EnigmaticCompat.EnigmaticTierEntry eEntry : com.mx.bettersurvival.integration.EnigmaticCompat
+                                        .getEnigmaticTierEntries()) {
+                                registerWeaponsForTier(eEntry.tier(), eEntry.name());
+                        }
+                }
         }
 
         private static void registerWeaponsForTier(Tier tier, String name) {

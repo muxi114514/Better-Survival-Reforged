@@ -96,6 +96,13 @@ public class CommonEventHandler {
                 }
             }
         }
+
+        // 以太·护盾粒子：持握且护盾生效时撒粒子（内部按 tick 节流、按强度缩放）
+        if (BetterSurvival.isEnigmaticLoaded
+                && entity.getMainHandItem().getItem() instanceof CustomWeaponItem weapon
+                && com.mx.bettersurvival.integration.EnigmaticCompat.isEtheriumTier(weapon.getTier())) {
+            com.mx.bettersurvival.integration.EnigmaticCompat.spawnShieldParticles(entity);
+        }
     }
 
     @SubscribeEvent
@@ -200,6 +207,28 @@ public class CommonEventHandler {
         if (isDirectAttack && BetterSurvival.isDefiledLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             com.mx.bettersurvival.integration.DefiledCompat.applyOnHitEffect(
                     weapon, target, attacker, event.getAmount());
+        }
+
+        // 以太·命中抽血：把生命注入护盾的高风险高回报循环（详见 EnigmaticCompat）
+        if (isDirectAttack && BetterSurvival.isEnigmaticLoaded
+                && weapon.getItem() instanceof CustomWeaponItem etherWeapon
+                && com.mx.bettersurvival.integration.EnigmaticCompat.isEtheriumTier(etherWeapon.getTier())) {
+            com.mx.bettersurvival.integration.EnigmaticCompat.applyDrainOnHit(attacker);
+        }
+    }
+
+    // 以太·渐变护盾：受击方持以太时按血量减伤/弹射免疫/击退攻击者。
+    // 独立处理器：需读"受击方"主手，且要覆盖任意来源伤害（非仅玩家攻击），故不能并入 onLivingHurt。
+    @SubscribeEvent
+    public static void onEtheriumShield(LivingHurtEvent event) {
+        if (!BetterSurvival.isEnigmaticLoaded)
+            return;
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide)
+            return;
+        if (victim.getMainHandItem().getItem() instanceof CustomWeaponItem weapon
+                && com.mx.bettersurvival.integration.EnigmaticCompat.isEtheriumTier(weapon.getTier())) {
+            com.mx.bettersurvival.integration.EnigmaticCompat.applyShield(event);
         }
     }
 
