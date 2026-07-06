@@ -240,6 +240,158 @@
     {
       "id": "bettersurvival:itemetheriumnunchaku",
       "required": false
+    },
+    "bettersurvival:itemlivinghammer",
+    "bettersurvival:itemlivingdagger",
+    "bettersurvival:itemlivingbattleaxe",
+    "bettersurvival:itemlivingnunchaku",
+    "bettersurvival:itemsentienthammer",
+    "bettersurvival:itemsentientdagger",
+    "bettersurvival:itemsentientbattleaxe",
+    "bettersurvival:itemsentientnunchaku",
+    {
+      "id": "bettersurvival:itemironwoodhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemironwooddagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemironwoodbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemironwoodnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemsteeleafhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemsteeleafdagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemsteeleafbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemsteeleafnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemknightmetalhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemknightmetaldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemknightmetalbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemknightmetalnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfieryhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfierydagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfierybattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfierynunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemancientmetalhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemancientmetaldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemancientmetalbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemancientmetalnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemblacksteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemblacksteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemblacksteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemblacksteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemcursiumhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemcursiumdagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemcursiumbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemcursiumnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemignitiumhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemignitiumdagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemignitiumbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemignitiumnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemwitheritehammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemwitheritedagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemwitheritebattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemwitheritenunchaku",
+      "required": false
     }
   ]
 }

@@ -1,25 +1,22 @@
 package com.mx.bettersurvival.items;
 
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
 
 /**
  * 自定义盾牌（移植自 1.12 BetterSurvival 的 ItemCustomShield）。
  *
  * <p>两把：小盾（blockPower 0.5 / weight 1）、大盾（blockPower 0.8 / weight 3）。
- * 手动实现举盾（{@link UseAnim#BLOCK} + {@link ToolActions#SHIELD_BLOCK}），
- * 从而复用原版方向格挡与 {@code ShieldBlockEvent}；具体减伤/被动/重量逻辑在事件处理器里。
+ *
+ * <p><b>直接继承原版 {@link ShieldItem}</b>（而非 {@code extends Item} 再手动照抄举盾方法）：
+ * 这样在类型系统里"真的是盾"，凡是按 {@code instanceof ShieldItem} 判定的第三方模组
+ * （更好战斗等战斗类 mod 接管格挡逻辑时正是这样判断）都会正确识别本模组盾牌，
+ * 从而正常挡伤害、播放盾牌音效。格挡姿势 / 使用时长 / 右键举盾 / {@code SHIELD_BLOCK}
+ * 工具动作全部复用原版实现；具体减伤 / 被动 / 重量逻辑仍在事件处理器里。
  */
-public class CustomShieldItem extends Item {
+public class CustomShieldItem extends ShieldItem {
 
     /** 盾牌专属附魔分类：仅匹配本模组盾牌。 */
     public static final EnchantmentCategory SHIELD_CATEGORY =
@@ -42,33 +39,13 @@ public class CustomShieldItem extends Item {
         return weight;
     }
 
-    @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.BLOCK;
-    }
-
-    @Override
-    public int getUseDuration(ItemStack stack) {
-        return 72000;
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        player.startUsingItem(hand);
-        return InteractionResultHolder.consume(stack);
-    }
-
-    @Override
-    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
-        return ToolActions.SHIELD_BLOCK.equals(toolAction);
-    }
-
+    // 盾牌可附魔（原版 ShieldItem 附魔值为 0，这里放开并按重量递减）
     @Override
     public int getEnchantmentValue() {
         return Math.max(1, 30 - 5 * weight);
     }
 
+    // 铁锭修复（覆盖原版的木板修复）
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
         return repair.is(Items.IRON_INGOT);

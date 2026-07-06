@@ -27,7 +27,7 @@ import java.util.UUID;
  * 自定义盾牌的战斗逻辑（移植自 1.12 ItemCustomShield + 事件处理）。
  *
  * <ul>
- *   <li>主动格挡：{@link ShieldBlockEvent} 只挡下 blockPower 比例（其余穿透）、反击退攻击者、Reflection 反弹、BlockPower 增强；</li>
+ *   <li>主动格挡：{@link ShieldBlockEvent} 完全挡下正面可格挡伤害（与原版盾一致）、反击退攻击者、Reflection 反弹；</li>
  *   <li>被动减伤：{@link LivingHurtEvent} 持盾即减伤（可配）；SpellShield 额外抵挡魔法；</li>
  *   <li>重量：{@link LivingEvent.LivingTickEvent} 举盾时按重量施加移速惩罚、Heavy 抗击退，放下即移除。</li>
  * </ul>
@@ -41,24 +41,32 @@ public final class ShieldEventHandler {
     private ShieldEventHandler() {
     }
 
-    /** 主动格挡：部分减伤（非完全免伤）+ 反击退 + 反射 + BlockPower 强化。 */
+    /** 主动格挡：完全挡下正面可格挡伤害（与原版盾一致）+ 反击退 + Reflection 反弹。 */
     @SubscribeEvent
     public static void onShieldBlock(ShieldBlockEvent event) {
         LivingEntity defender = event.getEntity();
         ItemStack shield = defender.getUseItem();
-        if (!(shield.getItem() instanceof CustomShieldItem custom)) {
+        if (!(shield.getItem() instanceof CustomShieldItem)) {
             return;
         }
 
-        float amount = event.getOriginalBlockedDamage();
-        int blockPowerLvl = shield.getEnchantmentLevel(ModEnchantments.BLOCK_POWER.get());
-        // 1.12 公式：穿透比例 =(1-blockPower)/(1+等级)；挡下 = 总量 × (1 - 穿透比例)
-        float remainingFraction = (1.0F - custom.getBlockPower()) / (1 + blockPowerLvl);
-        event.setBlockedDamage(amount * (1.0F - remainingFraction));
+        // 完全格挡：强制挡下全部可格挡伤害（原版盾行为，正面 100% 免伤）。
+        // 显式写回 originalBlockedDamage，兼容其它战斗 mod 事先削减过 blockedDamage 的情况。
+        event.setBlockedDamage(event.getOriginalBlockedDamage());
 
         if (defender.level().isClientSide) {
             return;
         }
+
+        // BlockPower：按等级几率免除本次盾牌耐久损耗（满级必定不掉耐久，让盾更耐用）
+        int blockPowerLvl = shield.getEnchantmentLevel(ModEnchantments.BLOCK_POWER.get());
+        if (blockPowerLvl > 0) {
+            int maxLvl = Math.max(1, ModConfig.COMMON.blockingPowerLevel.get());
+            if (defender.getRandom().nextFloat() < (float) blockPowerLvl / maxLvl) {
+                event.setShieldTakesDamage(false);
+            }
+        }
+
         // 近战：反击退攻击者 + Reflection 反弹
         DamageSource source = event.getDamageSource();
         Entity src = source.getEntity();
