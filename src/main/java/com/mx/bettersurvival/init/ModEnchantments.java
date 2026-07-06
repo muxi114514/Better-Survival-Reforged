@@ -46,4 +46,16 @@ public class ModEnchantments {
             HighJumpEnchantment::new);
     public static final RegistryObject<Enchantment> VITALITY = ENCHANTMENTS.register("vitality",
             VitalityEnchantment::new);
+
+    // 盾牌附魔
+    public static final RegistryObject<Enchantment> BLOCK_POWER = ENCHANTMENTS.register("blockpower",
+            BlockPowerEnchantment::new);
+    public static final RegistryObject<Enchantment> SPELL_SHIELD = ENCHANTMENTS.register("spellshield",
+            SpellShieldEnchantment::new);
+    public static final RegistryObject<Enchantment> REFLECTION = ENCHANTMENTS.register("reflection",
+            ReflectionEnchantment::new);
+    public static final RegistryObject<Enchantment> HEAVY = ENCHANTMENTS.register("heavy",
+            HeavyEnchantment::new);
+    public static final RegistryObject<Enchantment> WEIGHTLESS = ENCHANTMENTS.register("weightless",
+            WeightlessEnchantment::new);
 }

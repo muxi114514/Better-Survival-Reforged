@@ -199,6 +199,27 @@ public class CommonEventHandler {
             }
         }
 
+        // 暮色森林：赤铁点燃、骑士金属破甲
+        if (isDirectAttack && BetterSurvival.isTwilightLoaded && weapon.getItem() instanceof CustomWeaponItem) {
+            float bonus = com.mx.bettersurvival.integration.TwilightCompat.getMaterialModifier(weapon, target, attacker);
+            if (bonus > 0.0F) {
+                event.setAmount(event.getAmount() + bonus);
+            }
+        }
+
+        // 灾变：腾炎烙印、凋零、咒魂之怒（特效走状态效果，直接调灾变原生+原版）
+        if (isDirectAttack && BetterSurvival.isCataclysmLoaded && weapon.getItem() instanceof CustomWeaponItem) {
+            com.mx.bettersurvival.integration.CataclysmCompat.getMaterialModifier(weapon, target, attacker);
+        }
+
+        // SRP 风味（感知/觉知，常驻材料）：特效接口预留，见 SrpCompat
+        if (isDirectAttack && weapon.getItem() instanceof CustomWeaponItem) {
+            float bonus = com.mx.bettersurvival.integration.SrpCompat.getMaterialModifier(weapon, target, attacker);
+            if (bonus > 0.0F) {
+                event.setAmount(event.getAmount() + bonus);
+            }
+        }
+
         if (isDirectAttack && weapon.getItem() instanceof CustomWeaponItem cw
                 && cw.getTier() == com.mx.bettersurvival.init.ModTiers.CRYING_OBSIDIAN) {
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
@@ -387,7 +408,7 @@ public class CommonEventHandler {
         int level = tool.getEnchantmentLevel(ModEnchantments.VERSATILITY.get());
         if (level > 0) {
             float modifier = VersatilityEnchantment.getSpeedModifier(
-                    player, event.getState());
+                    player, event.getOriginalSpeed());
             if (modifier > 1.0F) {
                 event.setNewSpeed(event.getOriginalSpeed() + modifier);
             }
