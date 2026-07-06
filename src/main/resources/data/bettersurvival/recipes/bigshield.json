@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " WI",
+        "SWI",
+        " WI"
+    ],
+    "key": {
+        "W": {
+            "tag": "minecraft:planks"
+        },
+        "I": {
+            "item": "minecraft:iron_ingot"
+        },
+        "S": {
+            "item": "minecraft:stick"
+        }
+    },
+    "result": {
+        "item": "bettersurvival:itembigshield"
+    }
+}

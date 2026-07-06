@@ -124,6 +124,17 @@ public class CustomWeaponItem extends Item {
             com.mx.bettersurvival.integration.IaFCompat.addMaterialTooltip(this.tier, tooltip);
         }
 
+        if (BetterSurvival.isTwilightLoaded) {
+            com.mx.bettersurvival.integration.TwilightCompat.addMaterialTooltip(this.tier, tooltip);
+        }
+
+        if (BetterSurvival.isCataclysmLoaded) {
+            com.mx.bettersurvival.integration.CataclysmCompat.addMaterialTooltip(this.tier, tooltip);
+        }
+
+        // SRP 风味（常驻）：tooltip 接口预留
+        com.mx.bettersurvival.integration.SrpCompat.addMaterialTooltip(this.tier, tooltip);
+
         if (BetterSurvival.isDefiledLoaded) {
             com.mx.bettersurvival.integration.DefiledCompat.appendTooltip(stack, tooltip);
         }

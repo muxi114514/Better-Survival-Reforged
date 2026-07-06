@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " II",
+        "SII",
+        " II"
+    ],
+    "key": {
+        "I": {
+            "tag": "forge:ingots/fiery"
+        },
+        "S": {
+            "item": "minecraft:stick"
+        }
+    },
+    "result": {
+        "item": "bettersurvival:itemfieryhammer"
+    }
+}

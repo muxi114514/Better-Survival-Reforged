@@ -119,6 +119,11 @@ public class ModConfig {
                 public final ForgeConfigSpec.BooleanValue etheriumDrainEnabled;
                 public final ForgeConfigSpec.DoubleValue etheriumReachBonus;
 
+                // --- 自定义盾牌 ---
+                public final ForgeConfigSpec.DoubleValue shieldSmallPassiveDR;
+                public final ForgeConfigSpec.DoubleValue shieldBigPassiveDR;
+                public final ForgeConfigSpec.BooleanValue shieldWeightSlowdown;
+
                 CommonConfig(ForgeConfigSpec.Builder builder) {
 
                         builder.comment("Weapon settings").push("weapons");
@@ -287,6 +292,20 @@ public class ModConfig {
                                         .define("etheriumDrainEnabled", true);
                         etheriumReachBonus = builder.comment("Bonus attack reach while holding an Etherium weapon.")
                                         .defineInRange("etheriumReachBonus", 1.0, 0.0, 16.0);
+
+                        builder.pop();
+
+                        builder.comment("Custom shields (passive damage reduction + weight)").push("shields");
+
+                        shieldSmallPassiveDR = builder.comment(
+                                        "Passive damage reduction while merely holding the Small Shield (0.05 = 5%).")
+                                        .defineInRange("shieldSmallPassiveDR", 0.05, 0.0, 1.0);
+                        shieldBigPassiveDR = builder.comment(
+                                        "Passive damage reduction while merely holding the Big Shield (0.10 = 10%).")
+                                        .defineInRange("shieldBigPassiveDR", 0.10, 0.0, 1.0);
+                        shieldWeightSlowdown = builder.comment(
+                                        "Whether raising a shield slows movement based on its weight (reduced by Weightless).")
+                                        .define("shieldWeightSlowdown", true);
 
                         builder.pop();
                 }

@@ -31,6 +31,7 @@ public class ClientEventHandler {
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
                 ResourceLocation spinning = new ResourceLocation(BetterSurvival.MOD_ID, "spinning");
+                ResourceLocation blocking = new ResourceLocation(BetterSurvival.MOD_ID, "blocking");
                 for (RegistryObject<?> reg : ModItems.ITEMS.getEntries()) {
                     if (reg.get() instanceof NunchakuItem nunchaku) {
                         ItemProperties.register(nunchaku, spinning,
@@ -42,6 +43,11 @@ public class ClientEventHandler {
                                     }
                                     return 0.0F;
                                 });
+                    } else if (reg.get() instanceof com.mx.bettersurvival.items.CustomShieldItem shield) {
+                        // 举盾时切换到 _blocking 模型（与原版盾同理）
+                        ItemProperties.register(shield, blocking,
+                                (stack, level, entity, seed) -> entity != null && entity.isUsingItem()
+                                        && entity.getUseItem() == stack ? 1.0F : 0.0F);
                     }
                 }
             });
