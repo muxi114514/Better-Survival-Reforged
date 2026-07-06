@@ -33,6 +33,8 @@ public class BetterSurvival {
         public static boolean isDefiledLoaded;
         public static boolean isJMixinLoaded;
         public static boolean isEnigmaticLoaded;
+        public static boolean isTwilightLoaded;
+        public static boolean isCataclysmLoaded;
 
         public BetterSurvival() {
 
@@ -40,6 +42,8 @@ public class BetterSurvival {
                 isDefiledLoaded = net.minecraftforge.fml.ModList.get().isLoaded("defiledlands");
                 isJMixinLoaded = net.minecraftforge.fml.ModList.get().isLoaded("jmixin");
                 isEnigmaticLoaded = net.minecraftforge.fml.ModList.get().isLoaded("enigmaticlegacy");
+                isTwilightLoaded = net.minecraftforge.fml.ModList.get().isLoaded("twilightforest");
+                isCataclysmLoaded = net.minecraftforge.fml.ModList.get().isLoaded("cataclysm");
                 if (isIafLoaded)
                         LOGGER.info("RLC IaF detected — BS weapons will use IaF materials (with RLC effects).");
                 if (isDefiledLoaded)
@@ -48,6 +52,10 @@ public class BetterSurvival {
                         LOGGER.info("JMixin detected — chain lightning will be available.");
                 if (isEnigmaticLoaded)
                         LOGGER.info("Enigmatic Legacy detected — BS will provide Etherium weapons.");
+                if (isTwilightLoaded)
+                        LOGGER.info("Twilight Forest detected — BS will provide Twilight weapons.");
+                if (isCataclysmLoaded)
+                        LOGGER.info("Cataclysm detected — BS will provide Cataclysm weapons.");
 
                 IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 

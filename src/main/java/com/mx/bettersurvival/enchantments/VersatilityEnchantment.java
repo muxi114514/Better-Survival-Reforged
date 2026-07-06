@@ -7,8 +7,6 @@ import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.TierSortingRegistry;
 
 public class VersatilityEnchantment extends Enchantment {
 
@@ -16,10 +14,12 @@ public class VersatilityEnchantment extends Enchantment {
         super(Rarity.UNCOMMON, EnchantmentCategory.DIGGER, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
     }
 
-    public static float getSpeedModifier(Player miner, BlockState state) {
+    // 直接用 BreakSpeed 事件已算好的基础速度；切勿在此再调 getDestroySpeed，
+    // 否则会重入"手持工具/方块所属模组"的速度计算，遇到会重触发 BreakSpeed 的模组即无限递归崩端。
+    public static float getSpeedModifier(Player miner, float originalSpeed) {
         ItemStack stack = miner.getMainHandItem();
 
-        if (miner.getDestroySpeed(state) <= 1.0F && stack.getItem() instanceof DiggerItem digger) {
+        if (originalSpeed <= 1.0F && stack.getItem() instanceof DiggerItem digger) {
             return digger.getTier().getSpeed() / 2.0F;
         }
         return 1.0F;
