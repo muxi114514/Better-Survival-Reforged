@@ -1,12 +1,11 @@
 package com.mx.bettersurvival.enchantments;
 
 import com.mx.bettersurvival.config.ModConfig;
-import com.mx.bettersurvival.init.ModEnchantments;
 import com.mx.bettersurvival.items.CustomShieldItem;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-/** 格挡强化：提高主动格挡时挡下的伤害比例（与 SpellShield 互斥）。 */
+/** 格挡强化：举盾格挡时按等级几率免除盾牌耐久损耗，让盾更耐用。 */
 public class BlockPowerEnchantment extends Enchantment {
 
     public BlockPowerEnchantment() {
@@ -27,11 +26,6 @@ public class BlockPowerEnchantment extends Enchantment {
     @Override
     public int getMaxCost(int level) {
         return getMinCost(level) + 50;
-    }
-
-    @Override
-    protected boolean checkCompatibility(Enchantment other) {
-        return super.checkCompatibility(other) && other != ModEnchantments.SPELL_SHIELD.get();
     }
 
     @Override

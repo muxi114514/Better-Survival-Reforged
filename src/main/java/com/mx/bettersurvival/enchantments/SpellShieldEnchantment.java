@@ -1,12 +1,11 @@
 package com.mx.bettersurvival.enchantments;
 
 import com.mx.bettersurvival.config.ModConfig;
-import com.mx.bettersurvival.init.ModEnchantments;
 import com.mx.bettersurvival.items.CustomShieldItem;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-/** 法术护盾：主动格挡时可部分抵挡魔法伤害（与 BlockPower 互斥）。 */
+/** 法术护盾：举盾时部分抵挡魔法伤害（magic/indirect_magic 这类绕盾伤害）。 */
 public class SpellShieldEnchantment extends Enchantment {
 
     public SpellShieldEnchantment() {
@@ -27,11 +26,6 @@ public class SpellShieldEnchantment extends Enchantment {
     @Override
     public int getMaxCost(int level) {
         return getMinCost(level) + 50;
-    }
-
-    @Override
-    protected boolean checkCompatibility(Enchantment other) {
-        return super.checkCompatibility(other) && other != ModEnchantments.BLOCK_POWER.get();
     }
 
     @Override
