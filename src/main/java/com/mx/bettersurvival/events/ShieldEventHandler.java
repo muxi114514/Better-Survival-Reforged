@@ -1,12 +1,15 @@
 package com.mx.bettersurvival.events;
 
 import com.mx.bettersurvival.BetterSurvival;
+import com.mx.bettersurvival.combat.GuardStaminaService;
 import com.mx.bettersurvival.config.ModConfig;
 import com.mx.bettersurvival.enchantments.ReflectionEnchantment;
 import com.mx.bettersurvival.init.ModEnchantments;
 import com.mx.bettersurvival.init.ModItems;
 import com.mx.bettersurvival.items.CustomShieldItem;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -14,10 +17,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -76,6 +83,46 @@ public final class ShieldEventHandler {
         }
     }
 
+    /** 格挡精力·被击：任意盾格挡吸收伤害即扣精力，打空则破防（落盾+眩晕+冷却）。 */
+    @SubscribeEvent
+    public static void onGuardStaminaBlock(ShieldBlockEvent event) {
+        if (!GuardStaminaService.enabled() || event.getEntity().level().isClientSide) {
+            return;
+        }
+        if (event.getEntity() instanceof ServerPlayer player) {
+            GuardStaminaService.onBlocked(player, player.getUseItem(), event.getOriginalBlockedDamage());
+        }
+    }
+
+    /** 格挡精力·持盾攻击：副手举盾时的主手攻击扣精力，不足则否决本次攻击。 */
+    @SubscribeEvent
+    public static void onGuardStaminaAttack(AttackEntityEvent event) {
+        if (!GuardStaminaService.enabled() || event.getEntity().level().isClientSide) {
+            return;
+        }
+        Player player = event.getEntity();
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        if (player.isBlocking() && player.getUsedItemHand() == InteractionHand.OFF_HAND
+                && !GuardStaminaService.tryConsumeAttack(serverPlayer, player.getUseItem())) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** 格挡精力·破防冷却：冷却期间禁止重新举起任何盾（两端各按已同步状态判定）。 */
+    @SubscribeEvent
+    public static void onGuardStaminaStartUse(LivingEntityUseItemEvent.Start event) {
+        if (!GuardStaminaService.enabled()) {
+            return;
+        }
+        if (event.getEntity() instanceof Player player
+                && event.getItem().getUseAnimation() == UseAnim.BLOCK
+                && GuardStaminaService.isOnGuardCooldown(player)) {
+            event.setCanceled(true);
+        }
+    }
+
     /** 被动减伤（持盾即生效）+ SpellShield 魔法减伤（举盾时）。 */
     @SubscribeEvent
     public static void onShieldPassive(LivingHurtEvent event) {
@@ -115,6 +162,11 @@ public final class ShieldEventHandler {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide) {
             return;
+        }
+
+        // 格挡精力：每 tick 回复 + 破防冷却递减 + 按需同步。
+        if (entity instanceof ServerPlayer serverPlayer) {
+            GuardStaminaService.serverTick(serverPlayer);
         }
 
         AttributeInstance speed = entity.getAttribute(Attributes.MOVEMENT_SPEED);
