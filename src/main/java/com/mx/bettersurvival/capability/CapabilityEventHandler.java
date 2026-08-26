@@ -19,6 +19,8 @@ public class CapabilityEventHandler {
             "nunchaku_combo");
     private static final ResourceLocation SPEARS_IN_KEY = new ResourceLocation(BetterSurvival.MOD_ID,
             "spears_in");
+    private static final ResourceLocation GUARD_STAMINA_KEY = new ResourceLocation(BetterSurvival.MOD_ID,
+            "guard_stamina");
 
     @Mod.EventBusSubscriber(modid = BetterSurvival.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
@@ -28,6 +30,7 @@ public class CapabilityEventHandler {
             event.register(IArrowProperties.class);
             event.register(INunchakuCombo.class);
             event.register(ISpearsIn.class);
+            event.register(IGuardStamina.class);
         }
     }
 
@@ -43,6 +46,7 @@ public class CapabilityEventHandler {
 
             if (event.getObject() instanceof Player) {
                 event.addCapability(NUNCHAKU_COMBO_KEY, new NunchakuComboProvider());
+                event.addCapability(GUARD_STAMINA_KEY, new GuardStaminaProvider());
             }
 
             if (event.getObject() instanceof LivingEntity) {

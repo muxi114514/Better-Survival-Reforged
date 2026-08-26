@@ -124,6 +124,19 @@ public class ModConfig {
                 public final ForgeConfigSpec.DoubleValue shieldBigPassiveDR;
                 public final ForgeConfigSpec.BooleanValue shieldWeightSlowdown;
 
+                // --- 格挡精力（持盾攻击 / 硬破防）---
+                public final ForgeConfigSpec.BooleanValue guardStaminaEnabled;
+                public final ForgeConfigSpec.DoubleValue guardStaminaMax;
+                public final ForgeConfigSpec.DoubleValue guardStaminaAttackCost;
+                public final ForgeConfigSpec.DoubleValue guardStaminaBlockDrainPerDamage;
+                public final ForgeConfigSpec.DoubleValue guardStaminaRegenPerTick;
+                public final ForgeConfigSpec.IntValue guardStaminaRegenDelay;
+                public final ForgeConfigSpec.DoubleValue guardStaminaRegenBlockingMult;
+                public final ForgeConfigSpec.IntValue guardBreakStunTicks;
+                public final ForgeConfigSpec.IntValue guardBreakCooldownTicks;
+                public final ForgeConfigSpec.DoubleValue guardStaminaBlockPowerCostReduction;
+                public final ForgeConfigSpec.DoubleValue guardStaminaWeightStability;
+
                 CommonConfig(ForgeConfigSpec.Builder builder) {
 
                         builder.comment("Weapon settings").push("weapons");
@@ -308,12 +321,55 @@ public class ModConfig {
                                         .define("shieldWeightSlowdown", true);
 
                         builder.pop();
+
+                        builder.comment("Guard stamina for attack-while-blocking (Elden Ring style). "
+                                        + "Gated by the client 'attackWhileBlocking' master switch.")
+                                        .push("guard_stamina");
+
+                        guardStaminaEnabled = builder.comment(
+                                        "Enable guard stamina. When false, attacking while blocking costs nothing and "
+                                                        + "there is no guard break.")
+                                        .define("guardStaminaEnabled", true);
+                        guardStaminaMax = builder.comment("Maximum guard stamina.")
+                                        .defineInRange("guardStaminaMax", 140.0, 1.0, 100000.0);
+                        guardStaminaAttackCost = builder.comment("Stamina spent per main-hand attack while blocking.")
+                                        .defineInRange("guardStaminaAttackCost", 18.0, 0.0, 100000.0);
+                        guardStaminaBlockDrainPerDamage = builder.comment(
+                                        "Stamina drained per point of damage blocked by the shield.")
+                                        .defineInRange("guardStaminaBlockDrainPerDamage", 1.5, 0.0, 10000.0);
+                        guardStaminaRegenPerTick = builder.comment("Guard stamina regenerated per tick.")
+                                        .defineInRange("guardStaminaRegenPerTick", 2.0, 0.0, 10000.0);
+                        guardStaminaRegenDelay = builder.comment(
+                                        "Ticks to wait after spending stamina before it begins regenerating.")
+                                        .defineInRange("guardStaminaRegenDelay", 20, 0, 6000);
+                        guardStaminaRegenBlockingMult = builder.comment(
+                                        "Regen multiplier while actively holding block (guarding slows regen).")
+                                        .defineInRange("guardStaminaRegenBlockingMult", 0.4, 0.0, 1.0);
+                        guardBreakStunTicks = builder.comment("Stun duration (ticks) applied on guard break.")
+                                        .defineInRange("guardBreakStunTicks", 30, 0, 6000);
+                        guardBreakCooldownTicks = builder.comment(
+                                        "Ticks after a guard break during which the shield cannot be raised again.")
+                                        .defineInRange("guardBreakCooldownTicks", 20, 0, 6000);
+                        guardStaminaBlockPowerCostReduction = builder.comment(
+                                        "Per level of Blocking Power enchantment: reduces attack cost and increases "
+                                                        + "block stability.")
+                                        .defineInRange("guardStaminaBlockPowerCostReduction", 0.15, 0.0, 1.0);
+                        guardStaminaWeightStability = builder.comment(
+                                        "Per shield weight: reduces stamina drained when blocking a hit (heavier = sturdier).")
+                                        .defineInRange("guardStaminaWeightStability", 0.5, 0.0, 10.0);
+
+                        builder.pop();
                 }
         }
 
         public static class ClientConfig {
                 public final ForgeConfigSpec.BooleanValue fovShields;
                 public final ForgeConfigSpec.BooleanValue staticFOV;
+                public final ForgeConfigSpec.BooleanValue attackWhileBlocking;
+                public final ForgeConfigSpec.BooleanValue shieldAttackWhitelist;
+                public final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> shieldAttackList;
+                public final ForgeConfigSpec.BooleanValue shieldAttackAllowEmptyHand;
+                public final ForgeConfigSpec.BooleanValue guardStaminaHud;
 
                 ClientConfig(ForgeConfigSpec.Builder builder) {
                         builder.comment("Client settings").push("client");
@@ -322,6 +378,32 @@ public class ModConfig {
                                         .define("fovShields", true);
                         staticFOV = builder.comment("Prevent FoV changes completely.")
                                         .define("staticFOV", false);
+                        attackWhileBlocking = builder.comment(
+                                        "Master switch for attacking with the main hand while blocking with an OFF-HAND shield "
+                                                        + "(restores vanilla sword-and-board that Better Combat otherwise locks out).",
+                                        "When false the whole feature is disabled and the weapon list below is ignored.")
+                                        .define("attackWhileBlocking", true);
+                        shieldAttackWhitelist = builder.comment(
+                                        "List mode for the weapon rules below. false = blacklist (listed weapons CANNOT "
+                                                        + "attack while blocking, everything else can); true = whitelist (only listed "
+                                                        + "weapons can).")
+                                        .define("shieldAttackWhitelist", false);
+                        shieldAttackList = builder.comment(
+                                        "Main-hand weapon rules for the attack-while-blocking feature. Empty + blacklist = "
+                                                        + "current behaviour (every weapon can). Syntax per entry:",
+                                        "  #namespace:tag  -> a whole item tag/category, e.g. #spartanweaponry:sabers, #forge:tools/sword",
+                                        "  namespace:glob  -> registry id with wildcards * and ?, e.g. bettersurvival:*nunchaku, minecraft:*_sword",
+                                        "  namespace:item  -> one exact item, e.g. minecraft:trident",
+                                        "Standard whitelist example (also set shieldAttackWhitelist=true):",
+                                        "  [\"#spartanweaponry:sabers\", \"#spartanweaponry:greatswords\", \"bettersurvival:*nunchaku\", \"minecraft:trident\"]")
+                                        .defineListAllowEmpty("shieldAttackList", () -> java.util.List.of(),
+                                                        o -> o instanceof String);
+                        shieldAttackAllowEmptyHand = builder.comment(
+                                        "Whether an empty main hand (fists) may attack while blocking. Independent of the list above.")
+                                        .define("shieldAttackAllowEmptyHand", true);
+                        guardStaminaHud = builder.comment(
+                                        "Show the guard stamina bar above the hotbar.")
+                                        .define("guardStaminaHud", true);
 
                         builder.pop();
                 }
