@@ -15,6 +15,9 @@ public class ModCapabilities {
     public static final Capability<ISpearsIn> SPEARS_IN = CapabilityManager.get(new CapabilityToken<>() {
     });
 
+    public static final Capability<IGuardStamina> GUARD_STAMINA = CapabilityManager.get(new CapabilityToken<>() {
+    });
+
     private ModCapabilities() {
     }
 }
