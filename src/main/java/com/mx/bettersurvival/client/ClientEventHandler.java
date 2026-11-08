@@ -107,7 +107,9 @@ public class ClientEventHandler {
         @SubscribeEvent
         public static void onItemTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
             ItemStack stack = event.getItemStack();
-            if (stack.getItem() instanceof net.minecraft.world.item.SwordItem) {
+            // BS weapons are SwordItems now but already add this line in CustomWeaponItem.appendHoverText.
+            if (stack.getItem() instanceof net.minecraft.world.item.SwordItem
+                    && !(stack.getItem() instanceof com.mx.bettersurvival.items.CustomWeaponItem)) {
                 com.mx.bettersurvival.items.CustomWeaponItem.addVenomTooltip(stack, event.getToolTip());
             }
         }

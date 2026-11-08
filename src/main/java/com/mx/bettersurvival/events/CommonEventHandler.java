@@ -148,14 +148,14 @@ public class CommonEventHandler {
         boolean isDirectAttack = event.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
                 || event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MOB_ATTACK);
 
+        // Dagger backstab: every dagger does bonus damage from behind (as its tooltip says); Assassinate adds
+        // +0.5x per level on top. Previously the whole backstab was gated behind Assassinate, so plain daggers
+        // never backstabbed.
         if (weapon.getItem() instanceof DaggerItem dagger && isDirectAttack) {
-            int level = weapon.getEnchantmentLevel(ModEnchantments.ASSASSINATE.get());
-            if (level > 0) {
-                float backstabMult = dagger.getBackstabMultiplier(attacker, target);
-                if (backstabMult > 1.0F) {
-
-                    event.setAmount(event.getAmount() * (backstabMult + level * 0.5F));
-                }
+            float backstabMult = dagger.getBackstabMultiplier(attacker, target);
+            if (backstabMult > 1.0F) {
+                int level = weapon.getEnchantmentLevel(ModEnchantments.ASSASSINATE.get());
+                event.setAmount(event.getAmount() * (backstabMult + level * 0.5F));
             }
         }
 
@@ -172,8 +172,10 @@ public class CommonEventHandler {
         }
 
         if (weapon.getItem() instanceof BattleAxeItem && isDirectAttack) {
+            // disarmBaseChance applies to every full-strength battle axe hit (like stunBaseChance for hammers);
+            // Disarm only raises it. The old "level > 0" gate made base battle axes unable to disarm at all.
             int level = weapon.getEnchantmentLevel(ModEnchantments.DISARM.get());
-            if (level > 0 && attacker.getAttackStrengthScale(0.5F) > 0.9F) {
+            if (attacker.getAttackStrengthScale(0.5F) > 0.9F) {
                 double disarmChance = ModConfig.COMMON.disarmBaseChance.get()
                         + level * ModConfig.COMMON.disarmModifier.get();
                 if (attacker.getRandom().nextFloat() < disarmChance) {
@@ -184,6 +186,10 @@ public class CommonEventHandler {
                     }
                 }
             }
+        }
+
+        if (isDirectAttack) {
+            VampirismEnchantment.tryHeal(attacker, weapon.getEnchantmentLevel(ModEnchantments.VAMPIRISM.get()));
         }
 
         if (weapon.getItem() instanceof NunchakuItem && isDirectAttack) {
@@ -318,6 +324,10 @@ public class CommonEventHandler {
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide)
             return;
+        // Arrows already in the world re-join whenever their chunk loads; only newly fired arrows should get the
+        // Range speed boost / Arrow Recovery, or they get boosted again from whatever bow the owner holds now.
+        if (event.loadedFromDisk())
+            return;
         if (!(event.getEntity() instanceof AbstractArrow arrow))
             return;
         if (!(arrow.getOwner() instanceof Player player))
@@ -354,11 +364,15 @@ public class CommonEventHandler {
 
         arrow.getCapability(ModCapabilities.ARROW_PROPERTIES).ifPresent(props -> {
             int level = props.getRecoveryLevel();
-            if (level > 0) {
+            // Only arrows the player could pick up anyway: Multishot's extra arrows and Infinity/creative arrows are
+            // CREATIVE_ONLY, and recovering those created free arrows.
+            if (level > 0 && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
                 float chance = Math.min(1.0F, level * 0.33F);
                 if (player.getRandom().nextFloat() < chance) {
-
-                    player.getInventory().add(new ItemStack(Items.ARROW));
+                    ItemStack recovered = new ItemStack(Items.ARROW);
+                    if (!player.getInventory().add(recovered)) {
+                        player.drop(recovered, false);
+                    }
                     arrow.discard();
                 }
             }
@@ -454,6 +468,12 @@ public class CommonEventHandler {
         if (player.level().isClientSide)
             return;
 
+        // Only direct melee hits use the held weapon. LivingAttackEvent also fires for the player's arrows and thrown
+        // spears (their getEntity() is the player too), which broke the spear in hand when a thrown spear landed and
+        // spent potion-coating charges on bow shots.
+        if (event.getSource().getDirectEntity() != player)
+            return;
+
         ItemStack weapon = player.getMainHandItem();
 
         if (weapon.getItem() instanceof SpearItem spear) {
@@ -484,6 +504,18 @@ public class CommonEventHandler {
                     weapon.removeTagKey("remainingPotionHits");
                 }
             }
+        }
+    }
+
+    /**
+     * Anvils check {@code Enchantment.canEnchant}, which for Sweeping Edge just asks "is it a SwordItem?" — true now
+     * that BS weapons extend SwordItem, and the item gets no say. BS weapons can't sweep, so refuse the combination.
+     */
+    @SubscribeEvent
+    public static void onAnvilUpdate(net.minecraftforge.event.AnvilUpdateEvent event) {
+        if (event.getLeft().getItem() instanceof CustomWeaponItem
+                && EnchantmentHelper.getEnchantments(event.getRight()).containsKey(Enchantments.SWEEPING_EDGE)) {
+            event.setCanceled(true);
         }
     }
 

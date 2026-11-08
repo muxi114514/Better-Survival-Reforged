@@ -76,7 +76,10 @@ public class FlyingSpearEntity extends AbstractArrow {
             ItemStack spearStack = this.getSpear();
             if (!spearStack.isEmpty() && spearStack.getItem() instanceof SpearItem spearItem) {
 
-                if (this.pickup == Pickup.ALLOWED) {
+                // AbstractArrow.onHitEntity only discards the projectile when the hit actually landed. If it was
+                // blocked or the target was invulnerable, the spear bounces off and can still be picked up, so
+                // also lodging a copy in the target duplicated it.
+                if (this.pickup == Pickup.ALLOWED && this.isRemoved()) {
 
                     if (spearItem.breakChance() < this.random.nextFloat()) {
 

@@ -41,6 +41,12 @@ public class DiamondsEnchantment extends Enchantment {
         return stack.getItem() instanceof PickaxeItem;
     }
 
+    // The anvil uses canEnchant (category DIGGER = any digging tool), so without this the book went on shovels/axes/hoes.
+    @Override
+    public boolean canEnchant(ItemStack stack) {
+        return stack.getItem() instanceof PickaxeItem;
+    }
+
     @Override
     public boolean isTreasureOnly() {
         return ModConfig.COMMON.diamondsEverywhereTreasure.get();
