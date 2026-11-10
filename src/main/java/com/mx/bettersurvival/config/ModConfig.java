@@ -99,6 +99,7 @@ public class ModConfig {
                 public final ForgeConfigSpec.DoubleValue rangeVelocity;
                 public final ForgeConfigSpec.BooleanValue preventTunnelingBlockEntities;
 
+                public final ForgeConfigSpec.BooleanValue enableWeaponCoating;
                 public final ForgeConfigSpec.IntValue potionHitsBase;
                 public final ForgeConfigSpec.IntValue potionHitsMax;
                 public final ForgeConfigSpec.DoubleValue potionDurationDivisor;
@@ -251,6 +252,13 @@ public class ModConfig {
 
                         builder.comment("Potion Coating settings").push("potion_coating");
 
+                        enableWeaponCoating = builder.comment(
+                                        "Master switch for weapon potion coating: dipping a sword or a BetterSurvival weapon",
+                                        "into a potion cauldron so it applies that potion on hit.",
+                                        "When false, dipping does nothing, coated weapons apply no effect and the coating",
+                                        "tooltip is hidden; existing coating data is kept and works again once re-enabled.",
+                                        "Tipped arrows, bottle filling and the other cauldron uses are not affected.")
+                                        .define("enableWeaponCoating", true);
                         potionHitsBase = builder.comment(
                                         "Base number of charges (hits) added when dipping a weapon in a cauldron.")
                                         .defineInRange("potionHitsBase", 10, 1, 1000);
@@ -328,8 +336,8 @@ public class ModConfig {
 
                         guardStaminaEnabled = builder.comment(
                                         "Enable guard stamina. When false, attacking while blocking costs nothing and "
-                                                        + "there is no guard break.")
-                                        .define("guardStaminaEnabled", true);
+                                                        + "there is no guard break. Off by default.")
+                                        .define("guardStaminaEnabled", false);
                         guardStaminaMax = builder.comment("Maximum guard stamina.")
                                         .defineInRange("guardStaminaMax", 140.0, 1.0, 100000.0);
                         guardStaminaAttackCost = builder.comment("Stamina spent per main-hand attack while blocking.")
@@ -381,8 +389,8 @@ public class ModConfig {
                         attackWhileBlocking = builder.comment(
                                         "Master switch for attacking with the main hand while blocking with an OFF-HAND shield "
                                                         + "(restores vanilla sword-and-board that Better Combat otherwise locks out).",
-                                        "When false the whole feature is disabled and the weapon list below is ignored.")
-                                        .define("attackWhileBlocking", true);
+                                        "When false the whole feature is disabled and the weapon list below is ignored. Off by default.")
+                                        .define("attackWhileBlocking", false);
                         shieldAttackWhitelist = builder.comment(
                                         "List mode for the weapon rules below. false = blacklist (listed weapons CANNOT "
                                                         + "attack while blocking, everything else can); true = whitelist (only listed "

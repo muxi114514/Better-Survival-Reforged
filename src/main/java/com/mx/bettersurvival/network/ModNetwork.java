@@ -24,6 +24,11 @@ public class ModNetwork {
                 SpinningPacket::encode,
                 SpinningPacket::decode,
                 SpinningPacket::handle);
+        CHANNEL.registerMessage(id++, SpinningSyncPacket.class,
+                SpinningSyncPacket::encode,
+                SpinningSyncPacket::decode,
+                SpinningSyncPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(id++, GuardStaminaSyncPacket.class,
                 GuardStaminaSyncPacket::encode,
                 GuardStaminaSyncPacket::decode,

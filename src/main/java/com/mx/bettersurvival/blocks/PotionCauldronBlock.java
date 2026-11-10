@@ -1,5 +1,6 @@
 package com.mx.bettersurvival.blocks;
 
+import com.mx.bettersurvival.config.ModConfig;
 import com.mx.bettersurvival.init.ModBlocks;
 import com.mx.bettersurvival.init.ModPotions;
 import com.mx.bettersurvival.items.CustomWeaponItem;
@@ -161,7 +162,8 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
             BlockHitResult hit) {
         ItemStack stack = player.getItemInHand(hand);
 
-        if (stack.getItem() instanceof SwordItem || stack.getItem() instanceof CustomWeaponItem) {
+        if ((stack.getItem() instanceof SwordItem || stack.getItem() instanceof CustomWeaponItem)
+                && ModConfig.COMMON.enableWeaponCoating.get()) {
             if (level.isClientSide)
                 return InteractionResult.SUCCESS;
             BlockEntity be = level.getBlockEntity(pos);

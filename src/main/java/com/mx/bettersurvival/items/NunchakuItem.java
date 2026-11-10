@@ -50,14 +50,10 @@ public class NunchakuItem extends CustomWeaponItem {
 
     @Override
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity) {
+        // While spinning, let the hit through (the spin attacks via NunchakuClient);
+        // otherwise cancel the normal left-click attack.
         return player.getCapability(ModCapabilities.NUNCHAKU_COMBO)
-                .map(combo -> {
-                    if (!combo.isSpinning()) {
-                        player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, false);
-                        return true;
-                    }
-                    return false;
-                })
+                .map(combo -> !combo.isSpinning())
                 .orElse(false);
     }
 

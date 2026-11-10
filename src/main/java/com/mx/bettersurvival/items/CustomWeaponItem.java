@@ -3,6 +3,7 @@ package com.mx.bettersurvival.items;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.mx.bettersurvival.BetterSurvival;
+import com.mx.bettersurvival.config.ModConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
@@ -12,22 +13,34 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class CustomWeaponItem extends Item {
+/**
+ * Base class for every Better Survival weapon (hammer, spear, dagger, battle axe, nunchaku).
+ *
+ * <p>Extends {@link SwordItem} (as the original 1.12 Better Survival did with ItemSword) because almost every
+ * enchantment check in vanilla and in other mods is a type check: {@code EnchantmentCategory.WEAPON} is literally
+ * {@code item instanceof SwordItem}, the anvil uses {@code Enchantment.canEnchant} (which goes through that
+ * category, not through {@link #canApplyAtEnchantingTable}), and mods like Ultimate Enchantment / Apotheosis build
+ * their own "melee weapon" categories on top of {@code EnchantmentCategory.WEAPON}. As a plain {@code Item} our
+ * weapons failed all of those checks, so enchanted books could not be applied to them at an anvil and most modded
+ * weapon enchantments were unavailable. Sweeping is explicitly turned off below to keep the original behaviour.
+ */
+public class CustomWeaponItem extends SwordItem {
 
     protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
     protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
@@ -40,7 +53,9 @@ public class CustomWeaponItem extends Item {
     private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
     public CustomWeaponItem(Tier tier, float damageModifier, float delayModifier, Properties properties) {
-        super(properties.durability(tier.getUses()));
+        // SwordItem/TieredItem sets durability from the tier and builds its own attribute map; that map is never
+        // used because getDefaultAttributeModifiers is overridden below, and getDamage() is overridden too.
+        super(tier, 0, 0.0F, properties);
         this.tier = tier;
         this.attackDamage = (3.0F + tier.getAttackDamageBonus()) * damageModifier;
         this.attackSpeed = -2.4000000953674316 * delayModifier;
@@ -71,6 +86,21 @@ public class CustomWeaponItem extends Item {
 
     public float getAttackDamage() {
         return this.attackDamage;
+    }
+
+    /** SwordItem's own damage value (used e.g. by mobs deciding which weapon to pick up) — report our real damage. */
+    @Override
+    public float getDamage() {
+        return this.attackDamage;
+    }
+
+    /** Better Survival weapons never did sweep attacks; SwordItem would otherwise grant SWORD_SWEEP. */
+    @Override
+    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+        if (toolAction == ToolActions.SWORD_SWEEP) {
+            return false;
+        }
+        return super.canPerformAction(stack, toolAction);
     }
 
     @Override
@@ -109,8 +139,9 @@ public class CustomWeaponItem extends Item {
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if (enchantment != Enchantments.SWEEPING_EDGE && enchantment.category == EnchantmentCategory.WEAPON) {
-            return true;
+        // Sweeping Edge does nothing without the sweep action, so keep it off the table.
+        if (enchantment == Enchantments.SWEEPING_EDGE) {
+            return false;
         }
         return super.canApplyAtEnchantingTable(stack, enchantment);
     }
@@ -145,6 +176,8 @@ public class CustomWeaponItem extends Item {
     }
 
     public static void addVenomTooltip(ItemStack stack, List<Component> tooltip) {
+        if (!ModConfig.COMMON.enableWeaponCoating.get())
+            return;
         if (!stack.hasTag() || !stack.getTag().contains("remainingPotionHits"))
             return;
         int remaining = stack.getTag().getInt("remainingPotionHits");

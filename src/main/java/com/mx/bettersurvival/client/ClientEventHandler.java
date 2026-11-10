@@ -6,13 +6,10 @@ import com.mx.bettersurvival.capability.ModCapabilities;
 import com.mx.bettersurvival.init.ModEntities;
 import com.mx.bettersurvival.init.ModItems;
 import com.mx.bettersurvival.items.NunchakuItem;
-import com.mx.bettersurvival.network.ModNetwork;
-import com.mx.bettersurvival.network.SpinningPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -72,33 +69,8 @@ public class ClientEventHandler {
             if (player == null || mc.level == null)
                 return;
 
-            ItemStack mainHand = player.getMainHandItem();
-            boolean holdingNunchaku = mainHand.getItem() instanceof NunchakuItem;
-            boolean attackKeyDown = mc.options.keyAttack.isDown();
-
-            player.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
-                if (holdingNunchaku && attackKeyDown
-                        && !player.isPassenger()
-                        && player.getUseItem().isEmpty()) {
-
-                    if (!combo.isSpinning()) {
-                        combo.setSpinning(true);
-                        ModNetwork.CHANNEL.sendToServer(new SpinningPacket(true));
-                    }
-
-                    if (player.getAttackStrengthScale(0.5F) >= 1.0F) {
-                        Entity target = mc.crosshairPickEntity;
-                        if (target != null && target != player && target.isAlive()) {
-                            mc.gameMode.attack(player, target);
-                            player.resetAttackStrengthTicker();
-                        }
-                    }
-                } else if (combo.isSpinning()) {
-
-                    combo.setSpinning(false);
-                    ModNetwork.CHANNEL.sendToServer(new SpinningPacket(false));
-                }
-            });
+            // Spin/attack logic lives in NunchakuClient (client-only class).
+            NunchakuClient.tickSpin(mc, player);
         }
     }
 
@@ -107,7 +79,9 @@ public class ClientEventHandler {
         @SubscribeEvent
         public static void onItemTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
             ItemStack stack = event.getItemStack();
-            if (stack.getItem() instanceof net.minecraft.world.item.SwordItem) {
+            // BS weapons are SwordItems now but already add this line in CustomWeaponItem.appendHoverText.
+            if (stack.getItem() instanceof net.minecraft.world.item.SwordItem
+                    && !(stack.getItem() instanceof com.mx.bettersurvival.items.CustomWeaponItem)) {
                 com.mx.bettersurvival.items.CustomWeaponItem.addVenomTooltip(stack, event.getToolTip());
             }
         }

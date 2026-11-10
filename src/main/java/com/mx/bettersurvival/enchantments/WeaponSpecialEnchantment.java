@@ -58,8 +58,23 @@ public class WeaponSpecialEnchantment extends Enchantment {
         };
     }
 
+    /**
+     * Enchanting table check. The anvil does NOT call this — it calls {@link #canEnchant(ItemStack)}, which by default
+     * only looks at the category (WEAPON = any SwordItem). Both are overridden so each special enchantment goes on its
+     * own weapon type everywhere, and not on vanilla swords.
+     */
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack) {
+        return isForThisWeapon(stack);
+    }
+
+    /** Anvil / book check. */
+    @Override
+    public boolean canEnchant(ItemStack stack) {
+        return isForThisWeapon(stack);
+    }
+
+    private boolean isForThisWeapon(ItemStack stack) {
         return switch (weaponType) {
             case DAGGER -> stack.getItem() instanceof DaggerItem;
             case NUNCHAKU -> stack.getItem() instanceof NunchakuItem;

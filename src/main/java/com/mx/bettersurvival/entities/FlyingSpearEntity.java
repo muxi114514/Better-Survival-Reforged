@@ -74,9 +74,19 @@ public class FlyingSpearEntity extends AbstractArrow {
 
         if (!this.level().isClientSide && result.getEntity() instanceof LivingEntity living) {
             ItemStack spearStack = this.getSpear();
+
+            // Thrown elemental spears burn/freeze/shock what they hit, like in 1.12 Better Survival
+            // (no extra knockback, since there's no wielder). The spear is removed only when the hit landed.
+            if (BetterSurvival.isIafLoaded && this.isRemoved() && !spearStack.isEmpty()) {
+                com.mx.bettersurvival.integration.IaFCompat.getMaterialModifier(spearStack, living, null, true);
+            }
+
             if (!spearStack.isEmpty() && spearStack.getItem() instanceof SpearItem spearItem) {
 
-                if (this.pickup == Pickup.ALLOWED) {
+                // AbstractArrow.onHitEntity only discards the projectile when the hit actually landed. If it was
+                // blocked or the target was invulnerable, the spear bounces off and can still be picked up, so
+                // also lodging a copy in the target duplicated it.
+                if (this.pickup == Pickup.ALLOWED && this.isRemoved()) {
 
                     if (spearItem.breakChance() < this.random.nextFloat()) {
 
