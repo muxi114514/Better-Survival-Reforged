@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemblacksteelnunchaku"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

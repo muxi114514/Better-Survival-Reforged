@@ -11,5 +11,11 @@
     },
     "result": {
         "item": "bettersurvival:itemnetheritespear"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "defiledlands"
+        }
+    ]
 }

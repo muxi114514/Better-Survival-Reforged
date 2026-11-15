@@ -15,5 +15,11 @@
     },
     "result": {
         "item": "bettersurvival:itemetheriumbattleaxe"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "enigmaticlegacy"
+        }
+    ]
 }

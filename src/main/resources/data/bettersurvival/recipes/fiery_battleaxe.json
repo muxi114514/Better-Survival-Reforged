@@ -15,5 +15,11 @@
     },
     "result": {
         "item": "bettersurvival:itemfierybattleaxe"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "twilightforest"
+        }
+    ]
 }
