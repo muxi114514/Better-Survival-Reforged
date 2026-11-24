@@ -66,7 +66,7 @@ public final class ShieldEventHandler {
         }
 
         // BlockPower：按等级几率免除本次盾牌耐久损耗（满级必定不掉耐久，让盾更耐用）
-        int blockPowerLvl = shield.getEnchantmentLevel(ModEnchantments.BLOCK_POWER.get());
+        int blockPowerLvl = ModEnchantments.level(ModEnchantments.BLOCK_POWER, shield);
         if (blockPowerLvl > 0) {
             int maxLvl = Math.max(1, ModConfig.COMMON.blockingPowerLevel.get());
             if (defender.getRandom().nextFloat() < (float) blockPowerLvl / maxLvl) {
@@ -147,7 +147,7 @@ public final class ShieldEventHandler {
         }
 
         // SpellShield：举盾时部分抵挡魔法伤害（原版魔法通常无法格挡）
-        int spellLvl = shield.getEnchantmentLevel(ModEnchantments.SPELL_SHIELD.get());
+        int spellLvl = ModEnchantments.level(ModEnchantments.SPELL_SHIELD, shield);
         if (spellLvl > 0 && victim.isBlocking() && victim.getUseItem() == shield
                 && (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
             float blockPower = ((CustomShieldItem) shield.getItem()).getBlockPower();
@@ -178,13 +178,13 @@ public final class ShieldEventHandler {
         if (blocking && ModConfig.COMMON.shieldWeightSlowdown.get()) {
             ItemStack shield = entity.getUseItem();
             CustomShieldItem custom = (CustomShieldItem) shield.getItem();
-            int weightless = shield.getEnchantmentLevel(ModEnchantments.WEIGHTLESS.get());
+            int weightless = ModEnchantments.level(ModEnchantments.WEIGHTLESS, shield);
             int effWeight = Math.max(custom.getWeight() - 2 * weightless, 0);
             double mult = Math.pow(2, 1 - effWeight) - 1; // 越重越慢；effWeight<=1 时为 0（无惩罚）
             ensureModifier(speed, SHIELD_SPEED_UUID, "bettersurvival:shield_weight", mult,
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
-            boolean heavy = shield.getEnchantmentLevel(ModEnchantments.HEAVY.get()) > 0;
+            boolean heavy = ModEnchantments.level(ModEnchantments.HEAVY, shield) > 0;
             if (heavy) {
                 ensureModifier(kb, SHIELD_KB_UUID, "bettersurvival:shield_heavy", 1.0,
                         AttributeModifier.Operation.ADDITION);

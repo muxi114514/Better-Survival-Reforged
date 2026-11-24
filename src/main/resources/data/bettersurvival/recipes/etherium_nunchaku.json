@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemetheriumnunchaku"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "enigmaticlegacy"
+        }
+    ]
 }

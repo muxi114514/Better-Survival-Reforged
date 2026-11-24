@@ -25,7 +25,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -36,6 +35,10 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
+import com.mx.bettersurvival.mixin.AbstractArrowInvoker;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -55,7 +58,7 @@ public class CommonEventHandler {
             return;
 
         ItemStack legsArmor = entity.getItemBySlot(EquipmentSlot.LEGS);
-        int agilityLevel = legsArmor.getEnchantmentLevel(ModEnchantments.AGILITY.get());
+        int agilityLevel = ModEnchantments.level(ModEnchantments.AGILITY, legsArmor);
         if (agilityLevel > 0) {
             AgilityEnchantment.applySpeedModifier(entity, agilityLevel);
         } else {
@@ -64,7 +67,7 @@ public class CommonEventHandler {
 
         if (entity instanceof Player player) {
             ItemStack chestArmor = player.getItemBySlot(EquipmentSlot.CHEST);
-            int vitalityLevel = chestArmor.getEnchantmentLevel(ModEnchantments.VITALITY.get());
+            int vitalityLevel = ModEnchantments.level(ModEnchantments.VITALITY, chestArmor);
             VitalityEnchantment.healPlayer(player, vitalityLevel);
 
             if (player.getMainHandItem().getItem() instanceof NunchakuItem) {
@@ -110,7 +113,7 @@ public class CommonEventHandler {
         LivingEntity entity = event.getEntity();
 
         ItemStack boots = entity.getItemBySlot(EquipmentSlot.FEET);
-        int level = boots.getEnchantmentLevel(ModEnchantments.HIGH_JUMP.get());
+        int level = ModEnchantments.level(ModEnchantments.HIGH_JUMP, boots);
         if (level > 0) {
             HighJumpEnchantment.boostJump(entity, level);
         }
@@ -132,6 +135,21 @@ public class CommonEventHandler {
         }
     }
 
+    // Weapon bonuses go through Progressive Mechanics Library's damage pipeline when it's tracking the hit,
+    // so they stack with Spartan Weaponry traits and JLME enchantments by the same rules; otherwise edit the
+    // event's amount like before.
+    private static void addFlatDamage(LivingHurtEvent event, float bonus) {
+        if (!(BetterSurvival.isPmlLoaded
+                && com.mx.bettersurvival.integration.PmlCompat.addBaseFlatBonus(event.getSource(), bonus)))
+            event.setAmount(event.getAmount() + bonus);
+    }
+
+    private static void multiplyDamage(LivingHurtEvent event, float multiplier) {
+        if (!(BetterSurvival.isPmlLoaded
+                && com.mx.bettersurvival.integration.PmlCompat.addBaseMultiplier(event.getSource(), multiplier)))
+            event.setAmount(event.getAmount() * multiplier);
+    }
+
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
@@ -145,22 +163,22 @@ public class CommonEventHandler {
 
         // 过滤非直接近战伤害（如Melt/Frostbite的indirectMagic tick），
         // 避免药效持续伤害被误判为玩家攻击从而叠加/串联元素效果
-        boolean isDirectAttack = event.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
-                || event.getSource().is(net.minecraft.world.damagesource.DamageTypes.MOB_ATTACK);
+        // Also counts other melee damage types listed in PML's pml:is_melee_attack tag (see MeleeHits).
+        boolean isDirectAttack = com.mx.bettersurvival.combat.MeleeHits.isMeleeHit(event.getSource());
 
+        // Dagger backstab: every dagger does bonus damage from behind (as its tooltip says); Assassinate adds
+        // +0.5x per level on top. Previously the whole backstab was gated behind Assassinate, so plain daggers
+        // never backstabbed.
         if (weapon.getItem() instanceof DaggerItem dagger && isDirectAttack) {
-            int level = weapon.getEnchantmentLevel(ModEnchantments.ASSASSINATE.get());
-            if (level > 0) {
-                float backstabMult = dagger.getBackstabMultiplier(attacker, target);
-                if (backstabMult > 1.0F) {
-
-                    event.setAmount(event.getAmount() * (backstabMult + level * 0.5F));
-                }
+            float backstabMult = dagger.getBackstabMultiplier(attacker, target);
+            if (backstabMult > 1.0F) {
+                int level = ModEnchantments.level(ModEnchantments.ASSASSINATE, weapon);
+                multiplyDamage(event, backstabMult + level * 0.5F);
             }
         }
 
         if (weapon.getItem() instanceof HammerItem && isDirectAttack) {
-            int level = weapon.getEnchantmentLevel(ModEnchantments.BASH.get());
+            int level = ModEnchantments.level(ModEnchantments.BASH, weapon);
             double stunChance = ModConfig.COMMON.stunBaseChance.get()
                     + level * ModConfig.COMMON.bashModifier.get();
             if (attacker.getAttackStrengthScale(0.5F) > 0.9F
@@ -172,8 +190,10 @@ public class CommonEventHandler {
         }
 
         if (weapon.getItem() instanceof BattleAxeItem && isDirectAttack) {
-            int level = weapon.getEnchantmentLevel(ModEnchantments.DISARM.get());
-            if (level > 0 && attacker.getAttackStrengthScale(0.5F) > 0.9F) {
+            // disarmBaseChance applies to every full-strength battle axe hit (like stunBaseChance for hammers);
+            // Disarm only raises it. The old "level > 0" gate made base battle axes unable to disarm at all.
+            int level = ModEnchantments.level(ModEnchantments.DISARM, weapon);
+            if (attacker.getAttackStrengthScale(0.5F) > 0.9F) {
                 double disarmChance = ModConfig.COMMON.disarmBaseChance.get()
                         + level * ModConfig.COMMON.disarmModifier.get();
                 if (attacker.getRandom().nextFloat() < disarmChance) {
@@ -186,16 +206,20 @@ public class CommonEventHandler {
             }
         }
 
+        if (isDirectAttack) {
+            VampirismEnchantment.tryHeal(attacker, ModEnchantments.level(ModEnchantments.VAMPIRISM, weapon));
+        }
+
         if (weapon.getItem() instanceof NunchakuItem && isDirectAttack) {
             attacker.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
-                event.setAmount(event.getAmount() * (combo.getComboPower() + 1.0F));
+                multiplyDamage(event, combo.getComboPower() + 1.0F);
             });
         }
 
         if (isDirectAttack && BetterSurvival.isIafLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             float bonus = com.mx.bettersurvival.integration.IaFCompat.getMaterialModifier(weapon, target, attacker);
             if (bonus > 0.0F) {
-                event.setAmount(event.getAmount() + bonus);
+                addFlatDamage(event, bonus);
             }
         }
 
@@ -203,7 +227,7 @@ public class CommonEventHandler {
         if (isDirectAttack && BetterSurvival.isTwilightLoaded && weapon.getItem() instanceof CustomWeaponItem) {
             float bonus = com.mx.bettersurvival.integration.TwilightCompat.getMaterialModifier(weapon, target, attacker);
             if (bonus > 0.0F) {
-                event.setAmount(event.getAmount() + bonus);
+                addFlatDamage(event, bonus);
             }
         }
 
@@ -216,7 +240,7 @@ public class CommonEventHandler {
         if (isDirectAttack && weapon.getItem() instanceof CustomWeaponItem) {
             float bonus = com.mx.bettersurvival.integration.SrpCompat.getMaterialModifier(weapon, target, attacker);
             if (bonus > 0.0F) {
-                event.setAmount(event.getAmount() + bonus);
+                addFlatDamage(event, bonus);
             }
         }
 
@@ -260,7 +284,7 @@ public class CommonEventHandler {
         if (!(item.getItem() instanceof BowItem))
             return;
 
-        int rapidFireLevel = item.getEnchantmentLevel(ModEnchantments.RAPID_FIRE.get());
+        int rapidFireLevel = ModEnchantments.level(ModEnchantments.RAPID_FIRE, item);
         if (rapidFireLevel <= 0)
             return;
 
@@ -271,7 +295,8 @@ public class CommonEventHandler {
         }
     }
 
-    @SubscribeEvent
+    // LOWEST so a mod that cancels the shot does so first (a cancelled ArrowLooseEvent isn't passed on to us).
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onArrowLoose(ArrowLooseEvent event) {
         Player player = event.getEntity();
         if (player.level().isClientSide)
@@ -284,23 +309,45 @@ public class CommonEventHandler {
         if (power < 0.1F)
             return;
 
-        int multishotLevel = bow.getEnchantmentLevel(ModEnchantments.MULTISHOT.get());
+        int multishotLevel = ModEnchantments.level(ModEnchantments.MULTISHOT, bow);
         if (multishotLevel > 0) {
+            // The extra arrows copy the ammo the bow is shooting (getProjectile also finds ammo in quivers that hook
+            // into it, like Spartan Weaponry's), so tipped/spectral/modded arrows fire extras of the same kind.
+            // ArrowLooseEvent fires before the bow checks its ammo; with no ammo the bow only fires in creative or
+            // with Infinity, which use plain arrows.
+            ItemStack ammo = player.getProjectile(bow);
+            boolean infinite = player.getAbilities().instabuild || bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+            if (ammo.isEmpty()) {
+                if (!infinite)
+                    return;
+                ammo = new ItemStack(Items.ARROW);
+            }
+            ArrowItem arrowItem = ammo.getItem() instanceof ArrowItem a ? a : (ArrowItem) Items.ARROW;
+
             int extraArrows = multishotLevel * 2;
             for (int i = 0; i < extraArrows; i++) {
 
                 float angleOffset = ((i / 2) + 1) * 10.0F * (i % 2 == 0 ? 1 : -1);
 
-                Arrow arrow = new Arrow(level, player);
+                // Built like BowItem.releaseUsing builds the real arrow (createArrow, then the bow's customArrow hook)
+                AbstractArrow arrow = arrowItem.createArrow(level, ammo, player);
+                if (bow.getItem() instanceof BowItem bowItem)
+                    arrow = bowItem.customArrow(arrow);
                 arrow.shootFromRotation(player, player.getXRot(),
                         player.getYRot() + angleOffset, 0.0F,
                         power * 3.0F, 1.0F);
+                // Extras are free, so they can't be picked up (or recovered by Arrow Recovery)
                 arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 
                 int powerLevel = bow.getEnchantmentLevel(Enchantments.POWER_ARROWS);
                 if (powerLevel > 0) {
                     arrow.setBaseDamage(
                             arrow.getBaseDamage() + (double) powerLevel * 0.5D + 0.5D);
+                }
+
+                int punchLevel = bow.getEnchantmentLevel(Enchantments.PUNCH_ARROWS);
+                if (punchLevel > 0) {
+                    arrow.setKnockback(punchLevel);
                 }
 
                 if (bow.getEnchantmentLevel(Enchantments.FLAMING_ARROWS) > 0) {
@@ -318,22 +365,30 @@ public class CommonEventHandler {
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide)
             return;
+        // Arrows already in the world re-join whenever their chunk loads; only newly fired arrows should get the
+        // Range speed boost / Arrow Recovery, or they get boosted again from whatever bow the owner holds now.
+        if (event.loadedFromDisk())
+            return;
         if (!(event.getEntity() instanceof AbstractArrow arrow))
             return;
         if (!(arrow.getOwner() instanceof Player player))
             return;
 
-        ItemStack bow = findBow(player);
-        if (bow.isEmpty())
+        // Only arrows shot from the bow the player is drawing right now. BowItem.releaseUsing spawns the arrow while
+        // the bow is still the item in use, so this is that bow. Thrown spears, Spartan throwing weapons, tridents and
+        // crossbow bolts aren't shot from a drawn bow, so a bow held in the other hand no longer gives them its
+        // Range speed or Arrow Recovery.
+        ItemStack bow = player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY;
+        if (!(bow.getItem() instanceof BowItem))
             return;
 
-        int rangeLevel = bow.getEnchantmentLevel(ModEnchantments.RANGE.get());
+        int rangeLevel = ModEnchantments.level(ModEnchantments.RANGE, bow);
         if (rangeLevel > 0) {
             double multiplier = RangeEnchantment.getVelocityMultiplier();
             arrow.setDeltaMovement(arrow.getDeltaMovement().scale(multiplier));
         }
 
-        int recoveryLevel = bow.getEnchantmentLevel(ModEnchantments.ARROW_RECOVERY.get());
+        int recoveryLevel = ModEnchantments.level(ModEnchantments.ARROW_RECOVERY, bow);
         if (recoveryLevel > 0) {
             arrow.getCapability(ModCapabilities.ARROW_PROPERTIES).ifPresent(props -> {
                 props.setRecoveryLevel(recoveryLevel);
@@ -341,7 +396,9 @@ public class CommonEventHandler {
         }
     }
 
-    @SubscribeEvent
+    // LOWEST so a mod that cancels the hit (Ice and Fire lets arrows pass through ghosts) does so first; cancelled
+    // events aren't passed on to us, so the arrow isn't recovered when it never really hit.
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onArrowHit(ProjectileImpactEvent event) {
         if (event.getEntity().level().isClientSide)
             return;
@@ -354,11 +411,16 @@ public class CommonEventHandler {
 
         arrow.getCapability(ModCapabilities.ARROW_PROPERTIES).ifPresent(props -> {
             int level = props.getRecoveryLevel();
-            if (level > 0) {
+            // Only arrows the player could pick up anyway: Multishot's extra arrows and Infinity/creative arrows are
+            // CREATIVE_ONLY, and recovering those created free arrows.
+            if (level > 0 && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
                 float chance = Math.min(1.0F, level * 0.33F);
                 if (player.getRandom().nextFloat() < chance) {
-
-                    player.getInventory().add(new ItemStack(Items.ARROW));
+                    // The arrow's own pickup item: a tipped arrow keeps its potion, a modded arrow stays that arrow
+                    ItemStack recovered = ((AbstractArrowInvoker) arrow).bettersurvival$getPickupItem();
+                    if (!recovered.isEmpty()) {
+                        giveRecovered(player, recovered.copy());
+                    }
                     arrow.discard();
                 }
             }
@@ -375,7 +437,7 @@ public class CommonEventHandler {
         ItemStack tool = player.getMainHandItem();
 
         if (!isMiningTunneling) {
-            int tunnelingLevel = tool.getEnchantmentLevel(ModEnchantments.TUNNELING.get());
+            int tunnelingLevel = ModEnchantments.level(ModEnchantments.TUNNELING, tool);
             if (tunnelingLevel > 0) {
                 isMiningTunneling = true;
                 try {
@@ -386,7 +448,7 @@ public class CommonEventHandler {
             }
         }
 
-        int diamondsLevel = tool.getEnchantmentLevel(ModEnchantments.DIAMONDS.get());
+        int diamondsLevel = ModEnchantments.level(ModEnchantments.DIAMONDS, tool);
         if (diamondsLevel > 0 && isStoneBlock(state)) {
             float chance = diamondsLevel * 0.01F;
             if (player.getRandom().nextFloat() < chance) {
@@ -405,7 +467,7 @@ public class CommonEventHandler {
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
         ItemStack tool = player.getMainHandItem();
-        int level = tool.getEnchantmentLevel(ModEnchantments.VERSATILITY.get());
+        int level = ModEnchantments.level(ModEnchantments.VERSATILITY, tool);
         if (level > 0) {
             float modifier = VersatilityEnchantment.getSpeedModifier(
                     player, event.getOriginalSpeed());
@@ -415,14 +477,20 @@ public class CommonEventHandler {
         }
     }
 
-    private static ItemStack findBow(Player player) {
-        ItemStack mainHand = player.getMainHandItem();
-        if (mainHand.getItem() instanceof BowItem)
-            return mainHand;
-        ItemStack offHand = player.getOffhandItem();
-        if (offHand.getItem() instanceof BowItem)
-            return offHand;
-        return ItemStack.EMPTY;
+    /**
+     * Hands a recovered arrow to the player the way picking it up would: pickup handlers get it first (Spartan
+     * Weaponry quivers with Ammo Collect on take arrows from EntityItemPickupEvent), what they leave goes into the
+     * inventory, and what doesn't fit drops at the player's feet. Not dropped on the ground first, because with
+     * ItemPhysic's click-to-pick-up the player would have to pick every recovered arrow up by hand.
+     */
+    private static void giveRecovered(Player player, ItemStack stack) {
+        // Carrier item for the event only; it is never added to the world
+        ItemEntity carrier = new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), stack);
+        MinecraftForge.EVENT_BUS.post(new EntityItemPickupEvent(player, carrier));
+        ItemStack left = carrier.getItem();
+        if (!left.isEmpty() && !player.getInventory().add(left)) {
+            player.drop(left, false);
+        }
     }
 
     private static boolean isStoneBlock(BlockState state) {
@@ -454,6 +522,12 @@ public class CommonEventHandler {
         if (player.level().isClientSide)
             return;
 
+        // Only direct melee hits use the held weapon. LivingAttackEvent also fires for the player's arrows and thrown
+        // spears (their getEntity() is the player too), which broke the spear in hand when a thrown spear landed and
+        // spent potion-coating charges on bow shots.
+        if (event.getSource().getDirectEntity() != player)
+            return;
+
         ItemStack weapon = player.getMainHandItem();
 
         if (weapon.getItem() instanceof SpearItem spear) {
@@ -463,7 +537,8 @@ public class CommonEventHandler {
             }
         }
 
-        if (weapon.hasTag() && weapon.getTag().contains("remainingPotionHits")) {
+        if (ModConfig.COMMON.enableWeaponCoating.get()
+                && weapon.hasTag() && weapon.getTag().contains("remainingPotionHits")) {
             int hits = weapon.getTag().getInt("remainingPotionHits");
             if (hits > 0) {
                 LivingEntity target = event.getEntity();
@@ -484,6 +559,18 @@ public class CommonEventHandler {
                     weapon.removeTagKey("remainingPotionHits");
                 }
             }
+        }
+    }
+
+    /**
+     * Anvils check {@code Enchantment.canEnchant}, which for Sweeping Edge just asks "is it a SwordItem?" — true now
+     * that BS weapons extend SwordItem, and the item gets no say. BS weapons can't sweep, so refuse the combination.
+     */
+    @SubscribeEvent
+    public static void onAnvilUpdate(net.minecraftforge.event.AnvilUpdateEvent event) {
+        if (event.getLeft().getItem() instanceof CustomWeaponItem
+                && EnchantmentHelper.getEnchantments(event.getRight()).containsKey(Enchantments.SWEEPING_EDGE)) {
+            event.setCanceled(true);
         }
     }
 

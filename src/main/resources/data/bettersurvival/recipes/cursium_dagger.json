@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemcursiumdagger"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

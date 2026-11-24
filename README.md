@@ -23,7 +23,6 @@ Five new weapon categories, each with a full material tier progression (Wood →
 
 - **Silver** — [Ice and Fire CE](https://github.com/iafenvoy/IceAndFire-CE) integration, +2 damage to undead
 - **Dragonbone / Fire / Ice / Lightning Dragonbone** — Crafted with Ice and Fire CE materials with elemental effects
-- **Fire / Ice / Lightning Dragonsteel** — Top-tier weapons with dragon element powers
 - **Umbrium / Scarlite** — [Defiled Lands](https://www.curseforge.com/minecraft/mc-mods/defiled-lands) integration with bleeding/vampirism effects
 
 ## ✨ Enchantments
