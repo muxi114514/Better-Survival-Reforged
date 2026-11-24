@@ -31,7 +31,7 @@ public class WeightlessEnchantment extends Enchantment {
 
     @Override
     protected boolean checkCompatibility(Enchantment other) {
-        return super.checkCompatibility(other) && other != ModEnchantments.HEAVY.get();
+        return super.checkCompatibility(other) && !ModEnchantments.is(ModEnchantments.HEAVY, other);
     }
 
     @Override

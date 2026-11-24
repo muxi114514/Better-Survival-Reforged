@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +23,7 @@ public class TunnelingEnchantment extends Enchantment {
     public static void mineManyBlocks(Player miner, BlockState state, BlockPos pos) {
         Level level = miner.level();
         ItemStack stack = miner.getMainHandItem();
-        int l = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.TUNNELING.get(), miner);
+        int l = ModEnchantments.level(ModEnchantments.TUNNELING, miner);
 
         if (l > 0 && canMineEffectively(miner, state, pos)) {
             Direction facing = Direction.getNearest(

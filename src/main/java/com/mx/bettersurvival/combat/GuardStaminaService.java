@@ -39,7 +39,7 @@ public final class GuardStaminaService {
     public static float attackCost(ItemStack shield) {
         float base = ModConfig.COMMON.guardStaminaAttackCost.get().floatValue();
         double red = ModConfig.COMMON.guardStaminaBlockPowerCostReduction.get();
-        int bp = shield == null ? 0 : shield.getEnchantmentLevel(ModEnchantments.BLOCK_POWER.get());
+        int bp = shield == null ? 0 : ModEnchantments.level(ModEnchantments.BLOCK_POWER, shield);
         return (float) (base / (1.0 + bp * red));
     }
 
@@ -50,7 +50,7 @@ public final class GuardStaminaService {
         if (shield.getItem() instanceof CustomShieldItem cs) {
             stability += cs.getWeight() * ModConfig.COMMON.guardStaminaWeightStability.get();
         }
-        stability += shield.getEnchantmentLevel(ModEnchantments.BLOCK_POWER.get())
+        stability += ModEnchantments.level(ModEnchantments.BLOCK_POWER, shield)
                 * ModConfig.COMMON.guardStaminaBlockPowerCostReduction.get();
         return (float) (blockedDamage * per / stability);
     }

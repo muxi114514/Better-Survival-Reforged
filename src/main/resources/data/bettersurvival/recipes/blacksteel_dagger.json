@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemblacksteeldagger"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

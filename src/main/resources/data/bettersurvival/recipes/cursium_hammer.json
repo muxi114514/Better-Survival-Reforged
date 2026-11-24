@@ -15,5 +15,11 @@
     },
     "result": {
         "item": "bettersurvival:itemcursiumhammer"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

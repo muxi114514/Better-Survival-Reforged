@@ -19,7 +19,7 @@ public class ReflectionEnchantment extends Enchantment {
 
     /** 格挡近战成功时调用：按等级概率反弹荆棘伤害，并消耗盾牌 1 点耐久。 */
     public static void reflectDamage(Entity attacker, LivingEntity defender, ItemStack shield) {
-        int level = shield.getEnchantmentLevel(ModEnchantments.REFLECTION.get());
+        int level = ModEnchantments.level(ModEnchantments.REFLECTION, shield);
         if (level <= 0) {
             return;
         }

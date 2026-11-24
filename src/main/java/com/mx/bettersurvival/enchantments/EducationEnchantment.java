@@ -7,7 +7,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class EducationEnchantment extends Enchantment {
@@ -19,7 +18,7 @@ public class EducationEnchantment extends Enchantment {
     public static float getExpMultiplier(Player killer, LivingEntity killed) {
         if (!killed.shouldDropExperience())
             return 1.0F;
-        float lvl = (float) EnchantmentHelper.getEnchantmentLevel(ModEnchantments.EDUCATION.get(), killer);
+        float lvl = (float) ModEnchantments.level(ModEnchantments.EDUCATION, killer);
         return (lvl / 2.0F) + 1.0F;
     }
 

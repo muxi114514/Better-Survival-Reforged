@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemfierydagger"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "twilightforest"
+        }
+    ]
 }

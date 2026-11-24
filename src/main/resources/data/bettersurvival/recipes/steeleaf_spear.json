@@ -16,5 +16,11 @@
     "result": {
         "item": "bettersurvival:itemsteeleafspear",
         "count": 4
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "twilightforest"
+        }
+    ]
 }

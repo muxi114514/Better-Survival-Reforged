@@ -4,6 +4,7 @@ import com.mx.bettersurvival.capability.ModCapabilities;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -35,6 +36,9 @@ public class SpinningPacket {
                     combo.setComboTime(0);
                 }
             });
+            // Tell everyone tracking this player, so they see the spin animation too.
+            ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> player),
+                    new SpinningSyncPacket(player.getId(), msg.spinning));
         });
         ctx.get().setPacketHandled(true);
     }

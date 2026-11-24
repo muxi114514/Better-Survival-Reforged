@@ -15,5 +15,11 @@
     },
     "result": {
         "item": "bettersurvival:itemancientmetalbattleaxe"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

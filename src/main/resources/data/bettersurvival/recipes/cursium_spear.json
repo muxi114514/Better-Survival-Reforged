@@ -16,5 +16,11 @@
     "result": {
         "item": "bettersurvival:itemcursiumspear",
         "count": 4
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

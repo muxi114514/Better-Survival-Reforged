@@ -37,7 +37,7 @@ public class SpearItem extends CustomWeaponItem {
     private final Multimap<Attribute, AttributeModifier> spearModifiers;
 
     public SpearItem(Tier tier, float damageModifier, float speedModifier, float reachBonus, Properties properties) {
-        super(tier, damageModifier, speedModifier, properties.stacksTo(16));
+        super(tier, damageModifier, speedModifier, properties);
         this.reach = reachBonus;
 
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
@@ -120,6 +120,28 @@ public class SpearItem extends CustomWeaponItem {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         return false;
+    }
+
+    // Spears are thrown and stack, and no enchantment carries over to the thrown spear, so they stay unenchantable.
+    // Now that the base class is a SwordItem, the anvil would otherwise accept weapon books on them.
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
+        return false;
+    }
+
+    /**
+     * Spears are meant to stack to 16 (the old constructor called stacksTo(16)), but giving an item durability, which
+     * TieredItem does from the tier, forces Item.Properties back to a stack size of 1, so spears never stacked. Spears are not damageable
+     * (see isDamageable/getMaxDamage), so report the intended stack size here instead.
+     */
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return 16;
     }
 
     @Override
