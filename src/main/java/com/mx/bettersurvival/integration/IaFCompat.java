@@ -22,7 +22,7 @@ import java.util.List;
  * 火系: 着火 + 击退 (同冰与火的火龙骨剑)
  * 冰系: 冰冻 + 缓慢/挖掘疲劳 + 击退 (同冰与火的冰龙骨剑)
  * 电系: ChainLightningUtils 链式闪电 + 击退 (同冰与火的雷龙骨剑)
- * 金龙钢: 圣铭之力（魔法伤害+发光）
+ * 金龙骨/金龙钢: 冰与火的奥术爆发 ArcaneBurstUtils (gold dragon bone / dragonsteel: the arcane burst)
  */
 public final class IaFCompat {
 
@@ -218,11 +218,13 @@ public final class IaFCompat {
             if (isFireDragon(target) || isIceDragon(target))
                 return 6.0F;
         }
-        // 金龙钢 — 圣铭之力
+        // gold dragonsteel: Ice and Fire's arcane burst (on cooldown), like the other gold dragon weapons,
+        // and more bonus damage against the elemental dragons than gold dragon bone
         else if (tier == GOLD_DRAGONSTEEL) {
-            if (applyEffects) {
-                applyGoldDragonsteelEffect(target, attacker, baseDamage);
-            }
+            if (applyEffects)
+                applyGoldAbility(target, attacker);
+            if (isFireDragon(target) || isIceDragon(target) || isLightningDragon(target))
+                return 6.0F;
         }
 
         return 0.0F;
@@ -360,22 +362,6 @@ public final class IaFCompat {
         }
     }
 
-    /**
-     * 金龙钢 — 圣铭之力: 魔法伤害 + 正面效果增伤 + 发光
-     */
-    private static void applyGoldDragonsteelEffect(LivingEntity target,
-            @Nullable LivingEntity attacker, float baseDamage) {
-        float bonusDamage = 0;
-        // 目标身上有正面效果时增伤30%
-        if (target.getActiveEffects().stream().anyMatch(e -> e.getEffect().isBeneficial())) {
-            bonusDamage = baseDamage * 0.3F;
-        }
-        if (attacker != null) {
-            target.hurt(attacker.level().damageSources().magic(), baseDamage * 0.5F + bonusDamage);
-        }
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60, 0));
-    }
-
     // ════════════════════════════════════════════════════════
     // 工具方法
     // ════════════════════════════════════════════════════════
@@ -394,7 +380,27 @@ public final class IaFCompat {
 
     /** Gold dragon bone weapons are hidden like Ice and Fire's other gold dragon items (no creative tab). */
     public static boolean isHiddenGoldItem(String registryPath) {
-        return registryPath.startsWith("itemgolddragonbone");
+        return registryPath.startsWith("itemgolddragonbone") || registryPath.startsWith("itemgolddragonsteel");
+    }
+
+    /**
+     * Whether a weapon stays out of the creative tab: the gold dragon weapons always, and the dragonsteel ones
+     * unless Ice and Fire's Enable Dragonsteel option is on (with that option off their ingots can't be made).
+     */
+    public static boolean isHiddenFromTab(String registryPath) {
+        return isHiddenGoldItem(registryPath) || (registryPath.contains("dragonsteel") && !dragonsteelEnabled());
+    }
+
+    // Ice and Fire's Enable Dragonsteel (the server's value on a connected client); false without an Ice and Fire
+    // that has the option
+    private static boolean dragonsteelEnabled() {
+        if (!net.minecraftforge.fml.ModList.get().isLoaded("iceandfire"))
+            return false;
+        try {
+            return com.github.alexthe666.iceandfire.item.DragonsteelContent.enabled();
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     public static void addMaterialTooltip(Tier tier, List<Component> tooltip) {
@@ -424,6 +430,8 @@ public final class IaFCompat {
             tooltip.add(Component.translatable("dragon_sword_gold.hurt2")
                     .withStyle(ChatFormatting.GOLD));
         } else if (tier == GOLD_DRAGONSTEEL) {
+            tooltip.add(Component.translatable("tooltip.bettersurvival.golddragonsteel.hurt1")
+                    .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("dragon_sword_gold.hurt2")
                     .withStyle(ChatFormatting.GOLD));
         }

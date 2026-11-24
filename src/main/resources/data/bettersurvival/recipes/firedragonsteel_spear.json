@@ -21,6 +21,9 @@
         {
             "type": "forge:mod_loaded",
             "modid": "iceandfire"
+        },
+        {
+            "type": "iceandfire:dragonsteel_enabled"
         }
     ]
 }

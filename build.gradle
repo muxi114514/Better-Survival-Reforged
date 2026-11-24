@@ -64,7 +64,7 @@ dependencies {
 
     // RLC IaF and its dependency Citadel (optional at runtime, needed at compile time)
     compileOnly files(
-        'libs/Ice_and_Fire_RLCraft-1.20.1-2.7.10.jar',
+        'libs/Ice_and_Fire_RLCraft-1.20.1-2.7.12.jar',
         'libs/citadel-2.6.3-1.20.1.jar'
     )
     // JMixin (for chain lightning — BS calls JMixin's API directly)

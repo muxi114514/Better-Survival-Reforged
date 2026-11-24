@@ -19,9 +19,10 @@ public class CreativeTabInit {
                     .icon(() -> Items.DIAMOND_SWORD.getDefaultInstance())
                     .displayItems((parameters, output) -> {
 
-                        // gold dragon bone weapons stay out of the tab, like Ice and Fire's hidden gold dragon items
+                        // gold dragon weapons stay out of the tab, like Ice and Fire's hidden gold dragon items,
+                        // and dragonsteel ones unless Ice and Fire's Enable Dragonsteel is on
                         ModItems.ITEMS.getEntries().stream()
-                                .filter(entry -> !com.mx.bettersurvival.integration.IaFCompat.isHiddenGoldItem(entry.getId().getPath()))
+                                .filter(entry -> !com.mx.bettersurvival.integration.IaFCompat.isHiddenFromTab(entry.getId().getPath()))
                                 .forEach(entry -> output.accept(entry.get()));
                     })
                     .build());

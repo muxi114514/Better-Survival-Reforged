@@ -20,6 +20,26 @@
     {
       "id": "bettersurvival:itemgolddragonbonenunchaku",
       "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelspear",
+      "required": false
     }
   ]
 }

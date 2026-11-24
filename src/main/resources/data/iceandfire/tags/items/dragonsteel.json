@@ -1,0 +1,85 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "bettersurvival:itemfiredragonsteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfiredragonsteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfiredragonsteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfiredragonsteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemfiredragonsteelspear",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemicedragonsteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemicedragonsteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemicedragonsteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemicedragonsteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemicedragonsteelspear",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemlightningdragonsteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemlightningdragonsteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemlightningdragonsteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemlightningdragonsteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemlightningdragonsteelspear",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelbattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteeldagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelhammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelnunchaku",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonsteelspear",
+      "required": false
+    }
+  ]
+}
