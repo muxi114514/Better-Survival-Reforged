@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemcursiumnunchaku"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

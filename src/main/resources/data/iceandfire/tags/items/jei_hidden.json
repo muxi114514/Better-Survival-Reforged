@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "bettersurvival:itemgolddragonbonehammer",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonbonespear",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonbonedagger",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonbonebattleaxe",
+      "required": false
+    },
+    {
+      "id": "bettersurvival:itemgolddragonbonenunchaku",
+      "required": false
+    }
+  ]
+}

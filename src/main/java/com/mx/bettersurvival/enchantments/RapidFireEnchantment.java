@@ -6,7 +6,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class RapidFireEnchantment extends Enchantment {
 
@@ -15,7 +14,7 @@ public class RapidFireEnchantment extends Enchantment {
     }
 
     public static int getChargeTimeReduction(LivingEntity shooter, int charge) {
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.RAPID_FIRE.get(), shooter);
+        int level = ModEnchantments.level(ModEnchantments.RAPID_FIRE, shooter);
         if (level < 4) {
             return (charge % (5 - level) == 0) ? 1 : 0;
         } else {
