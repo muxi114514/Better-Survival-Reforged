@@ -1,7 +1,6 @@
 package com.mx.bettersurvival.enchantments;
 
 import com.mx.bettersurvival.config.ModConfig;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -28,12 +27,16 @@ public class VampirismEnchantment extends Enchantment {
         return super.getMinCost(level) + 50;
     }
 
-    @Override
-    public void doPostAttack(LivingEntity user, Entity target, int level) {
-        if (user != null && target != null && !user.level().isClientSide) {
-            if (user.getRandom().nextFloat() < (float) level * 0.2F) {
-                user.heal(Math.max(1.0F, (float) level * 0.2F));
-            }
+    /**
+     * Called from CommonEventHandler.onLivingHurt for direct melee hits with the main-hand weapon.
+     *
+     * <p>This used to live in {@code doPostAttack}, but vanilla's {@code EnchantmentHelper.doPostDamageEffects}
+     * runs that hook for every equipped item (so a Vampirism sword in the off hand healed on any hit, arrows
+     * included) and, for players, runs it a second time for the main hand — healing rolled twice per hit.
+     */
+    public static void tryHeal(LivingEntity user, int level) {
+        if (level > 0 && user.getRandom().nextFloat() < (float) level * 0.2F) {
+            user.heal(Math.max(1.0F, (float) level * 0.2F));
         }
     }
 

@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemsteeleafdagger"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "twilightforest"
+        }
+    ]
 }

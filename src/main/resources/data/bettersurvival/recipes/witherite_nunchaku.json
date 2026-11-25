@@ -14,5 +14,11 @@
     },
     "result": {
         "item": "bettersurvival:itemwitheritenunchaku"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "cataclysm"
+        }
+    ]
 }

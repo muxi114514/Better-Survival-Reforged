@@ -15,5 +15,11 @@
     },
     "result": {
         "item": "bettersurvival:itemfieryhammer"
-    }
+    },
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "twilightforest"
+        }
+    ]
 }
