@@ -81,7 +81,9 @@ public class HammerItem extends CustomWeaponItem {
             }
         }
 
-        if (player.getAbilities().mayBuild) {
+        // block changes only on the server: on the client they changed the world before the server's answer came,
+        // so protected blocks flickered (ghost blocks). The server sends the real changes to every client.
+        if (!level.isClientSide && player.getAbilities().mayBuild) {
             for (int x = -5; x <= 5; x++) {
                 if ((facing == Direction.WEST || facing == Direction.EAST) && x != 0)
                     continue;
@@ -95,9 +97,9 @@ public class HammerItem extends CustomWeaponItem {
                             boolean particles = x * x + y * y + z * z >= 2.0f * (d - 2.0f);
                             BlockPos position = pos.offset(x, y, z);
 
-                            destroyGlassAt(level, position.relative(facing));
-                            destroyGlassAt(level, position.relative(facing.getOpposite()));
-                            destroyGlassAt(level, position);
+                            destroyGlassAt(player, position.relative(facing));
+                            destroyGlassAt(player, position.relative(facing.getOpposite()));
+                            destroyGlassAt(player, position);
 
                             BlockState faceState = level.getBlockState(position.relative(facing));
                             if (faceState.isFaceSturdy(level, position, Direction.UP)) {
@@ -132,8 +134,10 @@ public class HammerItem extends CustomWeaponItem {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    private void destroyGlassAt(Level level, BlockPos pos) {
-        if (level.getBlockState(pos).getBlock() instanceof AbstractGlassBlock) {
+    private void destroyGlassAt(Player player, BlockPos pos) {
+        Level level = player.level();
+        // the same protection check as crushing (claims, spawn protection)
+        if (level.getBlockState(pos).getBlock() instanceof AbstractGlassBlock && CrushingRecipe.mayChange(player, pos)) {
             level.destroyBlock(pos, true);
         }
     }

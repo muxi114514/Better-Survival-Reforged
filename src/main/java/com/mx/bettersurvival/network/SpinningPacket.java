@@ -28,6 +28,10 @@ public class SpinningPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player == null)
                 return;
+            // only with nunchaku in hand: the spin flag lets left clicks through NunchakuItem.onLeftClickEntity, so
+            // the server can't take a client's word for it (stopping is always allowed)
+            if (msg.spinning && !(player.getMainHandItem().getItem() instanceof com.mx.bettersurvival.items.NunchakuItem))
+                return;
 
             player.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {
                 combo.setSpinning(msg.spinning);

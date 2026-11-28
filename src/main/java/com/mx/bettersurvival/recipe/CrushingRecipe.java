@@ -1,5 +1,7 @@
 package com.mx.bettersurvival.recipe;
 
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.common.MinecraftForge;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -24,6 +26,28 @@ public class CrushingRecipe {
         return CRUSHING_BASE;
     }
 
+    /** True while {@link #mayChange} asks protection mods, so our own BreakEvent handler ignores that check. */
+    public static boolean checkingPermission;
+
+    /**
+     * Whether the player may change the block at pos. Claim and spawn-protection mods guard blocks through
+     * BlockEvent.BreakEvent (and vanilla through mayInteract), but the slam used setBlockAndUpdate/destroyBlock
+     * directly, which fire neither, so it could crush and break blocks inside other people's claims. This asks both,
+     * the same way a real block break would.
+     */
+    public static boolean mayChange(Player player, BlockPos pos) {
+        Level level = player.level();
+        if (level.isClientSide || !level.mayInteract(player, pos) || !player.mayUseItemAt(pos, net.minecraft.core.Direction.UP, player.getMainHandItem())) {
+            return false;
+        }
+        checkingPermission = true;
+        try {
+            return !MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, level.getBlockState(pos), player));
+        } finally {
+            checkingPermission = false;
+        }
+    }
+
     public static void crush(Player player, BlockPos pos, boolean particles) {
         Level level = player.level();
         if (level instanceof ServerLevel serverLevel && particles) {
@@ -31,7 +55,7 @@ public class CrushingRecipe {
                     1, 0.0, 0.0, 0.0, 0.0);
         }
         BlockState result = CrushingRecipe.instance().getCrushingResult(level.getBlockState(pos));
-        if (result != null) {
+        if (result != null && mayChange(player, pos)) {
 
             BlockState current = level.getBlockState(pos);
             if (isInfestedBlock(current) && !level.isClientSide) {

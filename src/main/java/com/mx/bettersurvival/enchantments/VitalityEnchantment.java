@@ -18,7 +18,9 @@ public class VitalityEnchantment extends Enchantment {
                 && player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)
                 && player.getFoodData().getFoodLevel() >= 18
                 && player.getHealth() < player.getMaxHealth()
-                && player.tickCount % (40 / level) == 0) {
+                && player.tickCount % Math.max(1, 40 / level) == 0) {
+            // max(1, ...): from level 41 up 40 / level is 0, and % 0 threw every tick (crashing the server); 21+ heals
+            // every tick, which is as fast as it can go
             player.heal(1.0F);
         }
     }

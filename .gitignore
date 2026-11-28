@@ -29,3 +29,4 @@ run/
 # Logs
 logs/
 *.log
+devmods/

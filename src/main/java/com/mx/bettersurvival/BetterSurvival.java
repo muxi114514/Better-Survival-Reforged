@@ -107,11 +107,19 @@ public class BetterSurvival {
 
                 event.enqueueWork(() -> {
 
+                        // keep vanilla's handler: put() replaces it, and it's the one that fills an empty cauldron
+                        // with water from a water bottle (returning PASS for water broke that)
+                        net.minecraft.core.cauldron.CauldronInteraction vanillaPotion =
+                                        net.minecraft.core.cauldron.CauldronInteraction.EMPTY.get(Items.POTION);
                         net.minecraft.core.cauldron.CauldronInteraction.EMPTY.put(Items.POTION,
                                         (state, level, pos, player, hand, stack) -> {
                                                 net.minecraft.world.item.alchemy.Potion potion = PotionUtils
                                                                 .getPotion(stack);
-                                                if (potion == Potions.WATER || potion == Potions.EMPTY)
+                                                if (potion == Potions.WATER)
+                                                        return vanillaPotion != null
+                                                                        ? vanillaPotion.interact(state, level, pos, player, hand, stack)
+                                                                        : InteractionResult.PASS;
+                                                if (potion == Potions.EMPTY)
                                                         return InteractionResult.PASS;
                                                 if (level.isClientSide)
                                                         return InteractionResult.SUCCESS;

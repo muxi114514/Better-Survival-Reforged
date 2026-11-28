@@ -58,6 +58,7 @@ public class FlyingSpearEntity extends AbstractArrow {
             return;
         }
 
+        float materialBonus = 0.0F;
         if (BetterSurvival.isIafLoaded && !this.level().isClientSide
                 && result.getEntity() instanceof LivingEntity living) {
             ItemStack spearStack = this.getSpear();
@@ -65,12 +66,19 @@ public class FlyingSpearEntity extends AbstractArrow {
                 float bonus = com.mx.bettersurvival.integration.IaFCompat.getMaterialModifier(
                         spearStack, living, null, false);
                 if (bonus > 0.0F) {
+                    materialBonus = bonus;
                     this.setBaseDamage(this.getBaseDamage() + bonus);
                 }
             }
         }
 
-        super.onHitEntity(result);
+        try {
+            super.onHitEntity(result);
+        } finally {
+            // the bonus is for this hit only: it used to stay in the base damage, so a spear that bounced off
+            // (target in its hurt cooldown) and hit again had it twice, three times...
+            if (materialBonus > 0.0F) this.setBaseDamage(this.getBaseDamage() - materialBonus);
+        }
 
         if (!this.level().isClientSide && result.getEntity() instanceof LivingEntity living) {
             ItemStack spearStack = this.getSpear();

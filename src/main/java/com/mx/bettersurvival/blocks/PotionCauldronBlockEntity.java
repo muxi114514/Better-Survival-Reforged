@@ -1,5 +1,6 @@
 package com.mx.bettersurvival.blocks;
 
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import com.mx.bettersurvival.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -32,6 +33,7 @@ public class PotionCauldronBlockEntity extends BlockEntity {
         this.storedPotion = potion;
         this.isMilk = false;
         setChanged();
+        syncToClients();
     }
 
     public boolean isMilk() {
@@ -43,6 +45,28 @@ public class PotionCauldronBlockEntity extends BlockEntity {
         if (milk)
             this.storedPotion = Potions.EMPTY;
         setChanged();
+        syncToClients();
+    }
+
+    /**
+     * Clients only learn a block entity's data from its update tag/packet. Without these the client never knew which
+     * potion (or milk) the cauldron held, so anything drawn from it on the client used the default.
+     */
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    /** Sends the new contents to players who already have the chunk. */
+    private void syncToClients() {
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     public List<MobEffectInstance> getEffects() {

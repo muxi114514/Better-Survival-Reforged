@@ -224,7 +224,12 @@ public final class IaFCompat {
                     }
 
                     bolt.addTag("IceAndFire_DontDestroyLoot");
+                    // Only the look of lightning. A real bolt on every hit set fire to the ground and converted what
+                    // it struck (villager to witch, pig to zombified piglin, creeper to charged creeper), since
+                    // thunderHit runs for whatever it hits; the damage (the 5 a real bolt deals) is dealt directly.
+                    bolt.setVisualOnly(true);
                     serverLevel.addFreshEntity(bolt);
+                    target.hurt(serverLevel.damageSources().lightningBolt(), 5.0F);
                 }
             }
             return;

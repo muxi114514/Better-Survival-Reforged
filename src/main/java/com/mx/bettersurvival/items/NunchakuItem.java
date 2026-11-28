@@ -5,7 +5,6 @@ import com.mx.bettersurvival.capability.ModCapabilities;
 import com.mx.bettersurvival.init.ModEnchantments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,10 +26,7 @@ public class NunchakuItem extends CustomWeaponItem {
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int knockbackMod = EnchantmentHelper.getKnockbackBonus(attacker) + 1;
-        target.knockback(-(float) knockbackMod * 0.1F,
-                Mth.sin(attacker.getYRot() * knockbackMod * 0.017453292F),
-                -Mth.cos(attacker.getYRot() * knockbackMod * 0.017453292F));
+        // (a knockback call was here with a negative strength, which LivingEntity.knockback ignores: it did nothing)
 
         if (attacker instanceof Player player) {
             player.getCapability(ModCapabilities.NUNCHAKU_COMBO).ifPresent(combo -> {

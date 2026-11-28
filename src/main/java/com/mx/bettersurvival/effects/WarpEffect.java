@@ -33,6 +33,9 @@ public class WarpEffect extends InstantenousMobEffect {
         Level level = entity.level();
         if (level.isClientSide)
             return;
+        // Antiwarp blocks this too: it only cancelled EntityTeleportEvent.EnderEntity, which randomTeleport doesn't fire
+        if (entity.hasEffect(com.mx.bettersurvival.init.ModMobEffects.ANTIWARP.get()))
+            return;
 
         double origX = entity.getX();
         double origY = entity.getY();

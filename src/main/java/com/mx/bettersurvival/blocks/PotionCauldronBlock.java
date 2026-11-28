@@ -98,12 +98,9 @@ public class PotionCauldronBlock extends AbstractCauldronBlock implements net.mi
             if (result.isEmpty())
                 return InteractionResult.PASS;
 
-            stack.shrink(1);
-            if (stack.isEmpty()) {
-                player.setItemInHand(hand, result);
-            } else if (!player.getInventory().add(result)) {
-                player.drop(result, false);
-            }
+            // vanilla's bottle filling: uses the bottle up in survival, keeps it in creative (and only adds the
+            // filled potion if the inventory doesn't have one yet), like a water cauldron
+            player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(stack, player, result));
             level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
             decreaseLevel(state, level, pos);
             return InteractionResult.SUCCESS;

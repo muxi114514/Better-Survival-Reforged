@@ -79,7 +79,13 @@ public final class ShieldEventHandler {
         Entity src = source.getEntity();
         if (src instanceof LivingEntity attacker && !source.is(DamageTypeTags.IS_PROJECTILE)) {
             attacker.knockback(0.5F, defender.getX() - attacker.getX(), defender.getZ() - attacker.getZ());
-            ReflectionEnchantment.reflectDamage(attacker, defender, shield);
+            // Reflection deals thorns damage, which a shield can block. Without this check two players facing each
+            // other with Reflection shields bounced one hit back and forth (each block reflecting again) until a roll
+            // failed or a shield broke, and from level 7 every roll succeeds: a stack overflow. A reflection isn't
+            // reflected again.
+            if (!source.is(DamageTypes.THORNS)) {
+                ReflectionEnchantment.reflectDamage(attacker, defender, shield);
+            }
         }
     }
 

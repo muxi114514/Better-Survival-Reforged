@@ -18,6 +18,19 @@ mixin {
     config "${mod_id}.mixins.json"
 }
 
+// Dev-only GameTests (src/gametest), run with ./gradlew runGameTestServer. They're never in the built jar.
+sourceSets {
+    gametest {
+        compileClasspath += main.output + main.compileClasspath
+        runtimeClasspath += main.output + main.runtimeClasspath
+    }
+}
+configurations {
+    gametestImplementation.extendsFrom implementation
+    gametestCompileOnly.extendsFrom compileOnly
+    gametestRuntimeOnly.extendsFrom runtimeOnly
+}
+
 minecraft {
     mappings channel: 'official', version: minecraft_version
     copyIdeResources = true
@@ -45,6 +58,19 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
         }
 
+        gameTestServer {
+            workingDirectory project.file('run')
+            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                    source sourceSets.gametest
+                }
+            }
+        }
+
         data {
             workingDirectory project.file('run')
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
@@ -58,6 +84,12 @@ minecraft {
 // Include generated resources in main source set
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+repositories {
+    // dev-only: other mods' jars for the GameTests (e.g. Ice and Fire + Citadel for its integration). Put them in
+    // devmods/ (gitignored) named <name>-dev.jar; nothing here goes into the built jar.
+    flatDir { dir 'devmods' }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -69,6 +101,10 @@ dependencies {
     )
     // JMixin (for chain lightning — BS calls JMixin's API directly)
     compileOnly files('libs/JMixin.jar')
+    // dev-only GameTest runtime mods from devmods/, deobfuscated by ForgeGradle so they run in the dev environment
+    fileTree(dir: 'devmods', include: '*-dev.jar').each { f ->
+        runtimeOnly fg.deobf("devmods:${f.name - '-dev.jar'}:dev")
+    }
 }
 
 // Workaround for SpongePowered/MixinGradle#38
